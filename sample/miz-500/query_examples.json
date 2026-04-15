@@ -1,0 +1,6 @@
+[
+  {
+    "question": "What is this book section about?",
+    "expected_citations": ["chk_sample_0001"]
+  }
+]

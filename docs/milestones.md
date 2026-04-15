@@ -39,7 +39,9 @@
 ## Milestone 5
 - [x] TASK-027 Embeddings and Chroma vector store
 
+## Milestone 6
+- [x] TASK-028 Index builder and query service
+
 ## Remaining milestones
-- [ ] Milestone 6 (TASK-028)
 - [ ] Milestone 7 (TASK-029)
 - [ ] Milestone 8 (TASK-030)

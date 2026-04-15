@@ -44,3 +44,5 @@ curl -s http://127.0.0.1:8000/api/v1/health
 - `POST /api/v1/books/{book_id}/artifacts/build`
 - `GET /api/v1/books/{book_id}/artifacts`
 - `GET /api/v1/books/{book_id}/artifacts/{artifact_type}`
+- `POST /api/v1/query/preview`
+- `POST /api/v1/query`
