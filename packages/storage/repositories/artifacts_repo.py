@@ -40,3 +40,12 @@ class ArtifactsRepository:
             .order_by(ArtifactORM.created_at.desc())
             .all()
         )
+
+    def get_latest_by_type(self, *, book_id: str, artifact_type: str) -> ArtifactORM | None:
+        return (
+            self.session.query(ArtifactORM)
+            .filter(ArtifactORM.book_id == book_id)
+            .filter(ArtifactORM.artifact_type == artifact_type)
+            .order_by(ArtifactORM.created_at.desc())
+            .first()
+        )

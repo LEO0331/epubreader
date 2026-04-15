@@ -30,8 +30,13 @@
 - [x] TASK-021 Semantic fallback chunker and chunk service
 - [x] TASK-022 Chunk inspection route
 
+## Milestone 4
+- [x] TASK-023 LLM provider abstraction and Ollama provider
+- [x] TASK-024 Prompt loader and prompt files
+- [x] TASK-025 Artifact generators
+- [x] TASK-026 Artifact routes and build endpoints
+
 ## Remaining milestones
-- [ ] Milestone 4 (TASK-023 to TASK-026)
 - [ ] Milestone 5 (TASK-027)
 - [ ] Milestone 6 (TASK-028)
 - [ ] Milestone 7 (TASK-029)

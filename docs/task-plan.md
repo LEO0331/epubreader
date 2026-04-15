@@ -22,6 +22,7 @@ Completed:
 - Milestone 1 (TASK-006 to TASK-013)
 - Milestone 2 (TASK-014 to TASK-019)
 - Milestone 3 (TASK-020 to TASK-022)
+- Milestone 4 (TASK-023 to TASK-026)
 
 Next gated milestone:
-- Milestone 4 (TASK-023 to TASK-026)
+- Milestone 5 (TASK-027)
