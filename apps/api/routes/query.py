@@ -16,12 +16,14 @@ router = APIRouter(prefix="/query", tags=["query"])
 class QueryPreviewRequest(BaseModel):
     question: str = Field(min_length=1)
     book_ids: list[str] | None = None
+    collection_id: str | None = None
     top_k: int = Field(default=5, ge=1, le=20)
 
 
 class QueryRequest(BaseModel):
     question: str = Field(min_length=1)
     book_ids: list[str] | None = None
+    collection_id: str | None = None
     top_k: int = Field(default=5, ge=1, le=20)
 
 
@@ -39,6 +41,7 @@ def query_preview(
     return engine.preview(
         question=payload.question,
         book_ids=payload.book_ids,
+        collection_id=payload.collection_id,
         top_k=payload.top_k,
     )
 
@@ -55,6 +58,7 @@ def query_answer(payload: QueryRequest, db: Session = Depends(get_db_session)) -
         return engine.answer(
             question=payload.question,
             book_ids=payload.book_ids,
+            collection_id=payload.collection_id,
             top_k=payload.top_k,
         )
     except ValueError as exc:

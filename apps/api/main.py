@@ -7,6 +7,7 @@ from apps.api.lifespan import lifespan
 from apps.api.middleware.request_id import RequestIdMiddleware
 from apps.api.routes.artifacts import router as artifacts_router
 from apps.api.routes.books import router as books_router
+from apps.api.routes.collections import router as collections_router
 from apps.api.routes.health import router as health_router
 from apps.api.routes.ingest import router as ingest_router
 from apps.api.routes.jobs import router as jobs_router
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     api_router.include_router(jobs_router)
     api_router.include_router(books_router)
     api_router.include_router(artifacts_router)
+    api_router.include_router(collections_router)
     api_router.include_router(query_router)
     app.include_router(api_router)
 

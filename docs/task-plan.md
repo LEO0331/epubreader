@@ -25,6 +25,8 @@ Completed:
 - Milestone 4 (TASK-023 to TASK-026)
 - Milestone 5 (TASK-027)
 - Milestone 6 (TASK-028)
+- Milestone 7 (TASK-029)
+- Milestone 8 (TASK-030)
 
 Next gated milestone:
-- Milestone 7 (TASK-029)
+- Full local MVP complete

@@ -42,6 +42,8 @@
 ## Milestone 6
 - [x] TASK-028 Index builder and query service
 
-## Remaining milestones
-- [ ] Milestone 7 (TASK-029)
-- [ ] Milestone 8 (TASK-030)
+## Milestone 7
+- [x] TASK-029 Collections and exporters
+
+## Milestone 8
+- [x] TASK-030 Evaluation suite and MVP hardening

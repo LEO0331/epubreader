@@ -46,3 +46,9 @@ curl -s http://127.0.0.1:8000/api/v1/health
 - `GET /api/v1/books/{book_id}/artifacts/{artifact_type}`
 - `POST /api/v1/query/preview`
 - `POST /api/v1/query`
+- `POST /api/v1/collections`
+- `GET /api/v1/collections`
+- `GET /api/v1/collections/{collection_id}`
+- `POST /api/v1/collections/{collection_id}/books`
+- `DELETE /api/v1/collections/{collection_id}/books/{book_id}`
+- `POST /api/v1/collections/{collection_id}/export`

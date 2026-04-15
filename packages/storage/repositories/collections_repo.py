@@ -23,6 +23,15 @@ class CollectionsRepository:
         return collection
 
     def add_book(self, *, collection_id: str, book_id: str) -> CollectionBookORM:
+        existing = (
+            self.session.query(CollectionBookORM)
+            .filter(CollectionBookORM.collection_id == collection_id)
+            .filter(CollectionBookORM.book_id == book_id)
+            .first()
+        )
+        if existing is not None:
+            return existing
+
         link = CollectionBookORM(collection_id=collection_id, book_id=book_id)
         self.session.add(link)
         self.session.flush()
@@ -35,3 +44,19 @@ class CollectionsRepository:
             .all()
         )
         return [row.book_id for row in rows]
+
+    def remove_book(self, *, collection_id: str, book_id: str) -> int:
+        deleted = (
+            self.session.query(CollectionBookORM)
+            .filter(CollectionBookORM.collection_id == collection_id)
+            .filter(CollectionBookORM.book_id == book_id)
+            .delete()
+        )
+        self.session.flush()
+        return int(deleted)
+
+    def get(self, collection_id: str) -> CollectionORM | None:
+        return self.session.get(CollectionORM, collection_id)
+
+    def list_collections(self) -> list[CollectionORM]:
+        return self.session.query(CollectionORM).order_by(CollectionORM.created_at.asc()).all()

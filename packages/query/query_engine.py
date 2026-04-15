@@ -10,6 +10,7 @@ from packages.prompts import PromptLoader
 from packages.query.citation_builder import build_citations
 from packages.query.index_builder import IndexBuilder
 from packages.storage.repositories.books_repo import BooksRepository
+from packages.storage.repositories.collections_repo import CollectionsRepository
 from packages.storage.repositories.queries_repo import QueriesRepository
 
 
@@ -17,6 +18,7 @@ class QueryEngine:
     def __init__(self, session: Session, data_root: str, prompts_dir: str):
         self.session = session
         self.books = BooksRepository(session)
+        self.collections = CollectionsRepository(session)
         self.queries = QueriesRepository(session)
         self.index_builder = IndexBuilder(session=session, data_root=data_root)
         self.embedder = get_default_embedding_provider()
@@ -28,9 +30,10 @@ class QueryEngine:
         *,
         question: str,
         book_ids: list[str] | None,
+        collection_id: str | None,
         top_k: int,
     ) -> dict[str, object]:
-        target_book_ids = self._resolve_book_scope(book_ids)
+        target_book_ids = self._resolve_book_scope(book_ids=book_ids, collection_id=collection_id)
         index_stats = self.index_builder.build_for_books(book_ids=target_book_ids)
 
         qvec = self.embedder.embed(EmbeddingRequest(texts=[question])).vectors[0]
@@ -70,9 +73,15 @@ class QueryEngine:
         *,
         question: str,
         book_ids: list[str] | None,
+        collection_id: str | None,
         top_k: int,
     ) -> dict[str, object]:
-        preview = self.preview(question=question, book_ids=book_ids, top_k=top_k)
+        preview = self.preview(
+            question=question,
+            book_ids=book_ids,
+            collection_id=collection_id,
+            top_k=top_k,
+        )
         evidence = preview["evidence"]
         evidence_rows = evidence if isinstance(evidence, list) else []
 
@@ -116,9 +125,16 @@ class QueryEngine:
             "retrieval_diagnostics": preview["diagnostics"],
         }
 
-    def _resolve_book_scope(self, book_ids: list[str] | None) -> list[str]:
+    def _resolve_book_scope(
+        self,
+        *,
+        book_ids: list[str] | None,
+        collection_id: str | None,
+    ) -> list[str]:
         if book_ids:
             return book_ids
+        if collection_id:
+            return self.collections.list_books(collection_id)
         rows = self.books.list(limit=100000, offset=0)
         return [row.id for row in rows]
 
