@@ -1,0 +1,8 @@
+llm:
+  provider: ollama
+  model: llama3.1
+  timeout_seconds: 60
+
+embeddings:
+  provider: local-placeholder
+  model: local

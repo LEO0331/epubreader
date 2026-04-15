@@ -1,0 +1,8 @@
+llm:
+  provider: api
+  model: remote-default
+  timeout_seconds: 60
+
+embeddings:
+  provider: api-placeholder
+  model: remote-default
