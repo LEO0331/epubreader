@@ -36,11 +36,22 @@ class ChunksRepository:
         return chunk
 
     def list_by_book(self, book_id: str, *, limit: int = 100, offset: int = 0) -> list[ChunkORM]:
-        return (
-            self.session.query(ChunkORM)
-            .filter(ChunkORM.book_id == book_id)
-            .order_by(ChunkORM.ordinal.asc())
-            .offset(offset)
-            .limit(limit)
-            .all()
-        )
+        return self.list_filtered(book_id=book_id, limit=limit, offset=offset, section_id=None)
+
+    def list_filtered(
+        self,
+        *,
+        book_id: str,
+        limit: int = 100,
+        offset: int = 0,
+        section_id: str | None = None,
+    ) -> list[ChunkORM]:
+        query = self.session.query(ChunkORM).filter(ChunkORM.book_id == book_id)
+        if section_id is not None:
+            query = query.filter(ChunkORM.section_id == section_id)
+        return query.order_by(ChunkORM.ordinal.asc()).offset(offset).limit(limit).all()
+
+    def delete_by_book(self, book_id: str) -> int:
+        deleted = self.session.query(ChunkORM).filter(ChunkORM.book_id == book_id).delete()
+        self.session.flush()
+        return int(deleted)

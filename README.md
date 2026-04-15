@@ -38,3 +38,4 @@ curl -s http://127.0.0.1:8000/api/v1/health
 - `GET /api/v1/books`
 - `GET /api/v1/books/{book_id}`
 - `GET /api/v1/books/{book_id}/sections`
+- `GET /api/v1/books/{book_id}/chunks`

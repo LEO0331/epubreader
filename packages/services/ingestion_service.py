@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
+from packages.chunking import ChunkingService
 from packages.cleaning import CleaningService
 from packages.core.models.enums import ArtifactType, BookStatus, JobType
 from packages.ingest.adapters import (
@@ -38,6 +39,7 @@ class IngestionService:
         self.parsing = ParsingService(session, data_root=data_root)
         self.cleaning = CleaningService(session, data_root=data_root)
         self.quality = ParseQualityScoringService(session)
+        self.chunking = ChunkingService(session, data_root=data_root)
 
     def ingest_url(self, *, source_type: str, url: str) -> dict[str, str]:
         book_id = str(uuid4())
@@ -93,6 +95,7 @@ class IngestionService:
         self.parsing.parse_book(book_id=book.id)
         self.cleaning.clean_book(book_id=book.id)
         self.quality.score_book(book_id=book.id)
+        self.chunking.chunk_book(book_id=book.id)
 
         self.session.commit()
         return {"book_id": book.id, "job_id": job_id}
@@ -131,6 +134,7 @@ class IngestionService:
         self.parsing.parse_book(book_id=book.id)
         self.cleaning.clean_book(book_id=book.id)
         self.quality.score_book(book_id=book.id)
+        self.chunking.chunk_book(book_id=book.id)
 
         self.session.commit()
         return {"book_id": book.id, "job_id": job_id}

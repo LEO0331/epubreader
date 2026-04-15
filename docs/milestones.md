@@ -25,8 +25,12 @@
 - [x] TASK-018 Parse quality scoring
 - [x] TASK-019 Book inspection routes
 
+## Milestone 3
+- [x] TASK-020 Structure-first chunker
+- [x] TASK-021 Semantic fallback chunker and chunk service
+- [x] TASK-022 Chunk inspection route
+
 ## Remaining milestones
-- [ ] Milestone 3 (TASK-020 to TASK-022)
 - [ ] Milestone 4 (TASK-023 to TASK-026)
 - [ ] Milestone 5 (TASK-027)
 - [ ] Milestone 6 (TASK-028)

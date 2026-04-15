@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import json
+
 from sqlalchemy.orm import Session
 
 from packages.storage.db.models import BookORM
 from packages.storage.repositories.books_repo import BooksRepository
+from packages.storage.repositories.chunks_repo import ChunksRepository
 from packages.storage.repositories.sections_repo import SectionsRepository
 
 
@@ -11,6 +14,7 @@ class BookInspectionService:
     def __init__(self, session: Session):
         self.books = BooksRepository(session)
         self.sections = SectionsRepository(session)
+        self.chunks = ChunksRepository(session)
 
     def list_books(self, *, limit: int = 100, offset: int = 0) -> list[dict[str, object]]:
         rows = self.books.list(limit=limit, offset=offset)
@@ -57,3 +61,31 @@ class BookInspectionService:
             "created_at": row.created_at.isoformat(),
             "updated_at": row.updated_at.isoformat(),
         }
+
+    def list_chunks(
+        self,
+        *,
+        book_id: str,
+        limit: int = 200,
+        offset: int = 0,
+        section_id: str | None = None,
+    ) -> list[dict[str, object]]:
+        rows = self.chunks.list_filtered(
+            book_id=book_id,
+            limit=limit,
+            offset=offset,
+            section_id=section_id,
+        )
+        out: list[dict[str, object]] = []
+        for row in rows:
+            out.append(
+                {
+                    "id": row.id,
+                    "book_id": row.book_id,
+                    "section_id": row.section_id,
+                    "ordinal": row.ordinal,
+                    "text": row.text,
+                    "metadata": json.loads(row.metadata_json),
+                }
+            )
+        return out

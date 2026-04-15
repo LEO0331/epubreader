@@ -57,7 +57,7 @@ def test_books_and_sections_routes_after_ingest_upload():
         detail = client.get(f"/api/v1/books/{book_id}")
         assert detail.status_code == 200
         assert detail.json()["parse_quality_score"] is not None
-        assert detail.json()["status"] == "cleaned"
+        assert detail.json()["status"] == "chunked"
 
         sections = client.get(f"/api/v1/books/{book_id}/sections")
         assert sections.status_code == 200
@@ -65,3 +65,10 @@ def test_books_and_sections_routes_after_ingest_upload():
         assert body["book_id"] == book_id
         assert body["count"] >= 1
         assert isinstance(body["sections"][0]["heading_path"], list)
+
+        chunks = client.get(f"/api/v1/books/{book_id}/chunks")
+        assert chunks.status_code == 200
+        chunks_body = chunks.json()
+        assert chunks_body["book_id"] == book_id
+        assert chunks_body["count"] >= 1
+        assert "metadata" in chunks_body["chunks"][0]

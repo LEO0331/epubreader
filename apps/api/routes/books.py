@@ -47,3 +47,31 @@ def get_sections(
         "offset": offset,
         "sections": sections,
     }
+
+
+@router.get("/{book_id}/chunks")
+def get_chunks(
+    book_id: str,
+    limit: int = Query(default=200, ge=1, le=2000),
+    offset: int = Query(default=0, ge=0),
+    section_id: str | None = Query(default=None),
+    db: Session = Depends(get_db_session),
+) -> dict[str, object]:
+    service = BookInspectionService(db)
+    if service.get_book(book_id=book_id) is None:
+        raise HTTPException(status_code=404, detail=f"Book not found: {book_id}")
+
+    chunks = service.list_chunks(
+        book_id=book_id,
+        limit=limit,
+        offset=offset,
+        section_id=section_id,
+    )
+    return {
+        "book_id": book_id,
+        "count": len(chunks),
+        "limit": limit,
+        "offset": offset,
+        "section_id": section_id,
+        "chunks": chunks,
+    }
