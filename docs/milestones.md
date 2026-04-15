@@ -36,8 +36,10 @@
 - [x] TASK-025 Artifact generators
 - [x] TASK-026 Artifact routes and build endpoints
 
+## Milestone 5
+- [x] TASK-027 Embeddings and Chroma vector store
+
 ## Remaining milestones
-- [ ] Milestone 5 (TASK-027)
 - [ ] Milestone 6 (TASK-028)
 - [ ] Milestone 7 (TASK-029)
 - [ ] Milestone 8 (TASK-030)

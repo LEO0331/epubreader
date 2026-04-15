@@ -11,6 +11,8 @@
 ## Repository layout
 - `apps/api/` FastAPI app, routers, middleware.
 - `packages/core/` typed core modules (config, logging, domain models).
+- `packages/embeddings/` embedding provider abstraction and local hook.
+- `packages/indexing/` Chroma vector store wrapper.
 - `configs/` YAML configuration profiles.
 - `docs/` implementation and design documentation.
 - `data/` local runtime artifacts (raw, normalized, artifacts, vectors).
