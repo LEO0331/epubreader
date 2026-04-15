@@ -15,6 +15,7 @@ venv/
 
 # Environment
 .env
+data/*.db
 
 # OS/editor
 .DS_Store

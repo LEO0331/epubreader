@@ -5,7 +5,10 @@ from fastapi import APIRouter, FastAPI
 from apps.api.errors import register_exception_handlers
 from apps.api.lifespan import lifespan
 from apps.api.middleware.request_id import RequestIdMiddleware
+from apps.api.routes.books import router as books_router
 from apps.api.routes.health import router as health_router
+from apps.api.routes.ingest import router as ingest_router
+from apps.api.routes.jobs import router as jobs_router
 from packages.core.config.loader import get_settings
 from packages.core.logging.logger import configure_logging
 
@@ -20,6 +23,9 @@ def create_app() -> FastAPI:
 
     api_router = APIRouter(prefix="/api/v1")
     api_router.include_router(health_router)
+    api_router.include_router(ingest_router)
+    api_router.include_router(jobs_router)
+    api_router.include_router(books_router)
     app.include_router(api_router)
 
     return app

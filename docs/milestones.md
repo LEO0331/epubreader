@@ -7,8 +7,17 @@
 - [x] TASK-004 FastAPI health route
 - [x] TASK-005 Logging and error middleware
 
+## Milestone 1
+- [x] TASK-006 Core domain models
+- [x] TASK-007 Database and migrations
+- [x] TASK-008 Repository layer
+- [x] TASK-009 Job service and lifecycle
+- [x] TASK-010 Source adapter interface
+- [x] TASK-011 `epub_url` and `uploaded_epub` adapters
+- [x] TASK-012 `miz_books` adapter
+- [x] TASK-013 Ingestion service and routes
+
 ## Remaining milestones
-- [ ] Milestone 1 (TASK-006 to TASK-013)
 - [ ] Milestone 2 (TASK-014 to TASK-019)
 - [ ] Milestone 3 (TASK-020 to TASK-022)
 - [ ] Milestone 4 (TASK-023 to TASK-026)

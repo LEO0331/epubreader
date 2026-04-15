@@ -29,3 +29,10 @@ Health check:
 ```bash
 curl -s http://127.0.0.1:8000/api/v1/health
 ```
+
+## Milestone 1 API endpoints
+- `POST /api/v1/ingest/url`
+- `POST /api/v1/ingest/upload`
+- `POST /api/v1/ingest/text` (placeholder)
+- `GET /api/v1/jobs/{job_id}`
+- `GET /api/v1/books`

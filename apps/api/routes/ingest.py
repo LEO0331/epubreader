@@ -1,0 +1,69 @@
+from __future__ import annotations
+
+from urllib.parse import urlparse
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from packages.core.config.loader import get_settings
+from packages.services.ingestion_service import IngestionService
+from packages.storage.db.session import get_db_session
+
+router = APIRouter(prefix="/ingest", tags=["ingest"])
+
+
+class IngestUrlRequest(BaseModel):
+    url: str
+    source_type: str | None = None
+
+
+class IngestResponse(BaseModel):
+    book_id: str
+    job_id: str
+
+
+def _detect_source_type(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.netloc == "books.miz.com.tw" and parsed.path.startswith("/read/"):
+        return "miz_books"
+    if url.lower().endswith(".epub"):
+        return "epub_url"
+    raise ValueError("Unable to infer source_type for URL; provide source_type explicitly")
+
+
+@router.post("/url", response_model=IngestResponse)
+def ingest_url(payload: IngestUrlRequest, db: Session = Depends(get_db_session)) -> IngestResponse:
+    source_type = payload.source_type or _detect_source_type(payload.url)
+    service = IngestionService(db, data_root=get_settings().storage.data_dir)
+    try:
+        result = service.ingest_url(source_type=source_type, url=payload.url)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return IngestResponse(**result)
+
+
+@router.post("/upload", response_model=IngestResponse)
+async def ingest_upload(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db_session),
+) -> IngestResponse:
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Uploaded file must have a filename")
+
+    payload = await file.read()
+    service = IngestionService(db, data_root=get_settings().storage.data_dir)
+    result = service.ingest_upload(filename=file.filename, upload_bytes=payload)
+    return IngestResponse(**result)
+
+
+class IngestTextPlaceholderRequest(BaseModel):
+    text: str
+
+
+@router.post("/text")
+def ingest_text(_: IngestTextPlaceholderRequest) -> dict[str, str]:
+    return {
+        "status": "not_implemented",
+        "message": "Text ingestion will be implemented in a later task.",
+    }

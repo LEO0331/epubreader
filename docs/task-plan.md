@@ -17,7 +17,9 @@ Rule: do not skip acceptance criteria; do not jump ahead unless dependencies are
 - Milestone 8: Evaluation and polish
 
 ## Current execution status
-This repository currently implements Milestone 0 baseline scaffolding:
-- TASK-001 through TASK-005
+Completed:
+- Milestone 0 (TASK-001 to TASK-005)
+- Milestone 1 (TASK-006 to TASK-013)
 
-The full task breakdown from the user-provided plan should be treated as canonical for upcoming implementation work.
+Next gated milestone:
+- Milestone 2 (TASK-014 to TASK-019)
