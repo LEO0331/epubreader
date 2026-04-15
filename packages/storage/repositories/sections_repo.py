@@ -45,3 +45,8 @@ class SectionsRepository:
             .limit(limit)
             .all()
         )
+
+    def delete_by_book(self, book_id: str) -> int:
+        deleted = self.session.query(SectionORM).filter(SectionORM.book_id == book_id).delete()
+        self.session.flush()
+        return int(deleted)

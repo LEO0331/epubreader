@@ -20,6 +20,7 @@ Rule: do not skip acceptance criteria; do not jump ahead unless dependencies are
 Completed:
 - Milestone 0 (TASK-001 to TASK-005)
 - Milestone 1 (TASK-006 to TASK-013)
+- Milestone 2 (TASK-014 to TASK-019)
 
 Next gated milestone:
-- Milestone 2 (TASK-014 to TASK-019)
+- Milestone 3 (TASK-020 to TASK-022)

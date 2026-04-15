@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "title": "MIZ 500 Sample",
+    "author": null,
+    "language": null,
+    "toc": []
+  },
+  "sections": [
+    {
+      "ordinal": 0,
+      "heading": "Intro",
+      "heading_path": ["Intro"],
+      "content": "Sample parsed content.",
+      "source_locator": "html"
+    }
+  ]
+}

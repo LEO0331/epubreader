@@ -36,3 +36,5 @@ curl -s http://127.0.0.1:8000/api/v1/health
 - `POST /api/v1/ingest/text` (placeholder)
 - `GET /api/v1/jobs/{job_id}`
 - `GET /api/v1/books`
+- `GET /api/v1/books/{book_id}`
+- `GET /api/v1/books/{book_id}/sections`

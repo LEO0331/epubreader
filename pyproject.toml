@@ -61,5 +61,9 @@ exclude = ["^tests/"]
 module = ["yaml"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["ebooklib"]
+ignore_missing_imports = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["apps", "packages"]

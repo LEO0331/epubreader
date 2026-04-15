@@ -46,3 +46,11 @@ class BooksRepository:
         book.raw_snapshot_path = snapshot_path
         self.session.flush()
         return book
+
+    def update_status(self, book_id: str, status: str) -> BookORM | None:
+        book = self.get(book_id)
+        if book is None:
+            return None
+        book.status = status
+        self.session.flush()
+        return book

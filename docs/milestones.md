@@ -17,8 +17,15 @@
 - [x] TASK-012 `miz_books` adapter
 - [x] TASK-013 Ingestion service and routes
 
+## Milestone 2
+- [x] TASK-014 EPUB parser
+- [x] TASK-015 HTML parser
+- [x] TASK-016 Parser orchestration service
+- [x] TASK-017 Cleaning pipeline
+- [x] TASK-018 Parse quality scoring
+- [x] TASK-019 Book inspection routes
+
 ## Remaining milestones
-- [ ] Milestone 2 (TASK-014 to TASK-019)
 - [ ] Milestone 3 (TASK-020 to TASK-022)
 - [ ] Milestone 4 (TASK-023 to TASK-026)
 - [ ] Milestone 5 (TASK-027)

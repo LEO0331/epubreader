@@ -1,0 +1,12 @@
+{
+  "book_id": "miz-500-sample",
+  "sections": [
+    {
+      "ordinal": 0,
+      "heading": "Intro",
+      "heading_path": ["Intro"],
+      "content": "Sample parsed content.",
+      "source_locator": "html"
+    }
+  ]
+}

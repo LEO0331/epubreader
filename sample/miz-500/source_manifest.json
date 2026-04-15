@@ -1,0 +1,6 @@
+{
+  "book_id": "miz-500-sample",
+  "source_type": "miz_books",
+  "source_ref": "https://books.miz.com.tw/read/sample",
+  "snapshot_path": "data/raw/miz-500-sample/source.html"
+}

@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
+from packages.cleaning import CleaningService
 from packages.core.models.enums import ArtifactType, BookStatus, JobType
 from packages.ingest.adapters import (
     AdapterRegistry,
@@ -13,6 +14,8 @@ from packages.ingest.adapters import (
     MizBooksAdapter,
     UploadedEpubAdapter,
 )
+from packages.parsing import ParsingService
+from packages.quality import ParseQualityScoringService
 from packages.services.job_service import JobService
 from packages.storage.repositories.artifacts_repo import ArtifactsRepository
 from packages.storage.repositories.books_repo import BooksRepository
@@ -32,6 +35,9 @@ class IngestionService:
             ]
         )
         self.raw_root = Path(data_root) / "raw"
+        self.parsing = ParsingService(session, data_root=data_root)
+        self.cleaning = CleaningService(session, data_root=data_root)
+        self.quality = ParseQualityScoringService(session)
 
     def ingest_url(self, *, source_type: str, url: str) -> dict[str, str]:
         book_id = str(uuid4())
@@ -84,6 +90,10 @@ class IngestionService:
             },
         )
 
+        self.parsing.parse_book(book_id=book.id)
+        self.cleaning.clean_book(book_id=book.id)
+        self.quality.score_book(book_id=book.id)
+
         self.session.commit()
         return {"book_id": book.id, "job_id": job_id}
 
@@ -117,5 +127,10 @@ class IngestionService:
                 "source_metadata": adapter.extract_metadata(payload),
             },
         )
+
+        self.parsing.parse_book(book_id=book.id)
+        self.cleaning.clean_book(book_id=book.id)
+        self.quality.score_book(book_id=book.id)
+
         self.session.commit()
         return {"book_id": book.id, "job_id": job_id}
