@@ -9,6 +9,8 @@ This UI is designed for non-technical users and connects directly to the FastAPI
 When parser mode is enabled, the UI hides or disables unsupported actions and shows:
 `Parser mode only supports ingestion/parsing/chunk inspection.`
 
+If backend API-key protection is enabled (`APP_API_KEY`), set the same key in **Settings**.
+
 ## Environment
 Create `frontend/.env.local`:
 

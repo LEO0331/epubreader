@@ -59,6 +59,10 @@ def load_settings(config_dir: str | None = None) -> AppSettings:
             "debug": _env_bool("APP_DEBUG", app_cfg.debug),
             "log_level": os.getenv("APP_LOG_LEVEL", app_cfg.log_level),
             "request_id_header": os.getenv("APP_REQUEST_ID_HEADER", app_cfg.request_id_header),
+            "api_key": os.getenv("APP_API_KEY", app_cfg.api_key),
+            "ingest_max_bytes": int(
+                os.getenv("APP_INGEST_MAX_BYTES", str(app_cfg.ingest_max_bytes))
+            ),
             "cors_allow_origins": (
                 _parse_csv(os.environ["APP_CORS_ALLOW_ORIGINS"])
                 if "APP_CORS_ALLOW_ORIGINS" in os.environ
@@ -66,6 +70,8 @@ def load_settings(config_dir: str | None = None) -> AppSettings:
             ),
         }
     )
+    if app_cfg.env.lower() not in {"local", "dev", "test"} and not app_cfg.api_key:
+        raise ValueError("APP_API_KEY is required for non-local environments")
 
     storage_cfg = storage_cfg.model_copy(
         update={

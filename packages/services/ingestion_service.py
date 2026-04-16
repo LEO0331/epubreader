@@ -23,16 +23,17 @@ from packages.storage.repositories.books_repo import BooksRepository
 
 
 class IngestionService:
-    def __init__(self, session: Session, data_root: str):
+    def __init__(self, session: Session, data_root: str, max_ingest_bytes: int = 50 * 1024 * 1024):
         self.session = session
         self.books_repo = BooksRepository(session)
         self.artifacts_repo = ArtifactsRepository(session)
         self.jobs = JobService(session)
+        # Keep adapter size limits aligned with route-level limits.
         self.registry = AdapterRegistry(
             adapters=[
-                EpubUrlAdapter(),
+                EpubUrlAdapter(max_bytes=max_ingest_bytes),
                 UploadedEpubAdapter(),
-                MizBooksAdapter(),
+                MizBooksAdapter(max_bytes=max_ingest_bytes),
             ]
         )
         self.raw_root = Path(data_root) / "raw"

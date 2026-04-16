@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from apps.api.errors import register_exception_handlers
 from apps.api.lifespan import lifespan
+from apps.api.middleware.api_key import ApiKeyMiddleware
 from apps.api.middleware.request_id import RequestIdMiddleware
 from apps.api.routes.artifacts import router as artifacts_router
 from apps.api.routes.books import router as books_router
@@ -26,11 +27,13 @@ def create_app() -> FastAPI:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=settings.app.cors_allow_origins,
-            allow_credentials=True,
+            allow_credentials=False,
             allow_methods=["*"],
             allow_headers=["*"],
         )
     app.add_middleware(RequestIdMiddleware, header_name=settings.app.request_id_header)
+    if settings.app.api_key:
+        app.add_middleware(ApiKeyMiddleware, api_key=settings.app.api_key)
     register_exception_handlers(app)
 
     api_router = APIRouter(prefix="/api/v1")

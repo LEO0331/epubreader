@@ -11,6 +11,7 @@ export type Feature =
 
 const RUNTIME_MODE_KEY = "bookqa.runtime_mode";
 const API_BASE_URL_KEY = "bookqa.api_base_url";
+const API_KEY_VALUE_KEY = "bookqa.api_key";
 
 const PARSER_ALLOWED: Feature[] = ["ingest", "books", "sections", "chunks"];
 
@@ -61,5 +62,23 @@ export function loadApiBaseUrl(): string {
 export function saveApiBaseUrl(url: string): void {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(API_BASE_URL_KEY, url.trim());
+  }
+}
+
+export function loadApiKey(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  return window.localStorage.getItem(API_KEY_VALUE_KEY)?.trim() ?? "";
+}
+
+export function saveApiKey(value: string): void {
+  if (typeof window !== "undefined") {
+    const clean = value.trim();
+    if (clean.length === 0) {
+      window.localStorage.removeItem(API_KEY_VALUE_KEY);
+    } else {
+      window.localStorage.setItem(API_KEY_VALUE_KEY, clean);
+    }
   }
 }

@@ -43,9 +43,10 @@ export default function BookDetailPage() {
   return (
     <div>
       <div className="card">
-        <h2>Book Detail</h2>
-        <p>Book ID: <span className="mono">{bookId}</span></p>
-        {book ? <pre>{JSON.stringify(book, null, 2)}</pre> : <p>Loading book metadata...</p>}
+        <h2 className="page-title">Book Detail</h2>
+        <p className="page-lead">Book ID: <span className="mono">{bookId}</span></p>
+        <p>This page helps you confirm parsing quality before running AI features.</p>
+        {book ? <pre>{JSON.stringify(book, null, 2)}</pre> : <p>Loading book information...</p>}
       </div>
 
       <div className="grid">
@@ -53,7 +54,7 @@ export default function BookDetailPage() {
           <h3>Sections</h3>
           {sections ? (
             <>
-              <p>Showing {sections.count} section records at offset {sections.offset}.</p>
+              <p>Showing {sections.count} sections from offset {sections.offset}.</p>
               <pre>{JSON.stringify(sections.sections, null, 2)}</pre>
               <div className="row">
                 <button
@@ -61,13 +62,13 @@ export default function BookDetailPage() {
                   onClick={() => setSectionOffset(Math.max(0, sectionOffset - PAGE_SIZE))}
                   disabled={sectionOffset === 0}
                 >
-                  Previous
+                  Previous Page
                 </button>
                 <button
                   onClick={() => setSectionOffset(sectionOffset + PAGE_SIZE)}
                   disabled={sections.count < PAGE_SIZE}
                 >
-                  Next
+                  Next Page
                 </button>
               </div>
             </>
@@ -80,7 +81,7 @@ export default function BookDetailPage() {
           <h3>Chunks</h3>
           {chunks ? (
             <>
-              <p>Showing {chunks.count} chunk records at offset {chunks.offset}.</p>
+              <p>Showing {chunks.count} chunks from offset {chunks.offset}.</p>
               <pre>{JSON.stringify(chunks.chunks, null, 2)}</pre>
               <div className="row">
                 <button
@@ -88,13 +89,13 @@ export default function BookDetailPage() {
                   onClick={() => setChunkOffset(Math.max(0, chunkOffset - PAGE_SIZE))}
                   disabled={chunkOffset === 0}
                 >
-                  Previous
+                  Previous Page
                 </button>
                 <button
                   onClick={() => setChunkOffset(chunkOffset + PAGE_SIZE)}
                   disabled={chunks.count < PAGE_SIZE}
                 >
-                  Next
+                  Next Page
                 </button>
               </div>
             </>

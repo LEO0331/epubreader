@@ -34,8 +34,13 @@ def _detect_source_type(url: str) -> str:
 
 @router.post("/url", response_model=IngestResponse)
 def ingest_url(payload: IngestUrlRequest, db: Session = Depends(get_db_session)) -> IngestResponse:
+    settings = get_settings()
     source_type = payload.source_type or _detect_source_type(payload.url)
-    service = IngestionService(db, data_root=get_settings().storage.data_dir)
+    service = IngestionService(
+        db,
+        data_root=settings.storage.data_dir,
+        max_ingest_bytes=settings.app.ingest_max_bytes,
+    )
     try:
         result = service.ingest_url(source_type=source_type, url=payload.url)
     except ValueError as exc:
@@ -50,9 +55,19 @@ async def ingest_upload(
 ) -> IngestResponse:
     if not file.filename:
         raise HTTPException(status_code=400, detail="Uploaded file must have a filename")
+    if not file.filename.lower().endswith(".epub"):
+        raise HTTPException(status_code=400, detail="Uploaded file must be an .epub file")
 
-    payload = await file.read()
-    service = IngestionService(db, data_root=get_settings().storage.data_dir)
+    settings = get_settings()
+    payload = await file.read(settings.app.ingest_max_bytes + 1)
+    if len(payload) > settings.app.ingest_max_bytes:
+        raise HTTPException(status_code=413, detail="Uploaded file exceeds maximum allowed size")
+
+    service = IngestionService(
+        db,
+        data_root=settings.storage.data_dir,
+        max_ingest_bytes=settings.app.ingest_max_bytes,
+    )
     result = service.ingest_upload(filename=file.filename, upload_bytes=payload)
     return IngestResponse(**result)
 

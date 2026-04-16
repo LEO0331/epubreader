@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from packages.core.config.loader import get_settings
 from packages.exporters import export_filesystem, export_github, export_obsidian
 from packages.services.collection_service import CollectionService
 from packages.storage.db.session import get_db_session
@@ -26,6 +27,22 @@ class CollectionBookRequest(BaseModel):
 class ExportRequest(BaseModel):
     target: str = Field(pattern="^(filesystem|obsidian|github)$")
     output_dir: str | None = None
+
+
+def _resolve_export_output_dir(output_dir: str | None) -> Path:
+    base = (Path(get_settings().storage.data_dir) / "exports").resolve()
+    if output_dir is None:
+        return base
+
+    requested = Path(output_dir)
+    if requested.is_absolute():
+        raise HTTPException(status_code=400, detail="output_dir must be relative")
+
+    resolved = (base / requested).resolve()
+    if base != resolved and base not in resolved.parents:
+        raise HTTPException(status_code=400, detail="output_dir must stay within data exports")
+
+    return resolved
 
 
 @router.post("")
@@ -102,7 +119,7 @@ def export_collection(
             }
         )
 
-    output_dir = Path(payload.output_dir) if payload.output_dir else Path("data") / "exports"
+    output_dir = _resolve_export_output_dir(payload.output_dir)
 
     target_path: Path
     if payload.target == "filesystem":

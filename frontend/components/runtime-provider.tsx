@@ -4,9 +4,11 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import {
   RuntimeMode,
+  loadApiKey,
   getInitialApiBaseUrl,
   loadApiBaseUrl,
   loadRuntimeMode,
+  saveApiKey,
   saveApiBaseUrl,
   saveRuntimeMode,
 } from "@/lib/runtime";
@@ -16,6 +18,8 @@ type RuntimeContextValue = {
   setMode: (mode: RuntimeMode) => void;
   apiBaseUrl: string;
   setApiBaseUrl: (url: string) => void;
+  apiKey: string;
+  setApiKey: (value: string) => void;
 };
 
 const RuntimeContext = createContext<RuntimeContextValue | undefined>(undefined);
@@ -23,10 +27,12 @@ const RuntimeContext = createContext<RuntimeContextValue | undefined>(undefined)
 export function RuntimeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<RuntimeMode>("api");
   const [apiBaseUrl, setApiBaseUrlState] = useState<string>(getInitialApiBaseUrl());
+  const [apiKey, setApiKeyState] = useState<string>("");
 
   useEffect(() => {
     setModeState(loadRuntimeMode());
     setApiBaseUrlState(loadApiBaseUrl());
+    setApiKeyState(loadApiKey());
   }, []);
 
   const value = useMemo<RuntimeContextValue>(
@@ -41,8 +47,13 @@ export function RuntimeProvider({ children }: { children: React.ReactNode }) {
         setApiBaseUrlState(url);
         saveApiBaseUrl(url);
       },
+      apiKey,
+      setApiKey: (value) => {
+        setApiKeyState(value);
+        saveApiKey(value);
+      },
     }),
-    [mode, apiBaseUrl],
+    [mode, apiBaseUrl, apiKey],
   );
 
   return <RuntimeContext.Provider value={value}>{children}</RuntimeContext.Provider>;

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRuntime } from "@/components/runtime-provider";
 import { api } from "@/lib/api";
 import { isFeatureEnabled, parserModeMessage } from "@/lib/runtime";
+import { runIfFeatureEnabled } from "@/lib/mode-guard";
 
 export default function CollectionsPage() {
   const { mode, apiBaseUrl } = useRuntime();
@@ -17,74 +18,66 @@ export default function CollectionsPage() {
   const [result, setResult] = useState<Record<string, unknown> | Array<Record<string, unknown>> | null>(null);
   const [error, setError] = useState("");
 
-  const withGuard = async (task: () => Promise<void>) => {
-    if (!collectionsEnabled) {
-      setError(parserModeMessage());
-      return;
-    }
-    setError("");
-    await task();
-  };
-
   return (
     <div>
       <div className="card">
-        <h2>Collections & Export</h2>
+        <h2 className="page-title">Collections & Export</h2>
+        <p className="page-lead">Group related books, then export a reusable knowledge bundle.</p>
         {!collectionsEnabled ? <p className="notice">{parserModeMessage()}</p> : null}
       </div>
 
       <div className="grid">
         <div className="card">
-          <h3>Create Collection</h3>
+          <h3>Create a Collection</h3>
           <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Collection name" />
           <button
             disabled={!collectionsEnabled || !name}
             onClick={() =>
-              void withGuard(async () => {
+              void runIfFeatureEnabled(collectionsEnabled, setError, async () => {
                 const payload = await api.createCollection(apiBaseUrl, name);
                 setResult(payload);
               })
             }
           >
-            Create
+            Create Collection
           </button>
         </div>
 
         <div className="card">
-          <h3>List Collections</h3>
+          <h3>View Collections</h3>
           <button
             className="secondary"
             disabled={!collectionsEnabled}
             onClick={() =>
-              void withGuard(async () => {
+              void runIfFeatureEnabled(collectionsEnabled, setError, async () => {
                 const payload = await api.listCollections(apiBaseUrl);
                 setResult(payload);
               })
             }
           >
-            Refresh List
+            Refresh Collections
           </button>
         </div>
 
         <div className="card">
-          <h3>Add Book To Collection</h3>
+          <h3>Add a Book to a Collection</h3>
           <input value={collectionId} onChange={(event) => setCollectionId(event.target.value)} placeholder="Collection ID" />
           <input value={bookId} onChange={(event) => setBookId(event.target.value)} placeholder="Book ID" />
           <button
             disabled={!collectionsEnabled || !collectionId || !bookId}
             onClick={() =>
-              void withGuard(async () => {
+              void runIfFeatureEnabled(collectionsEnabled, setError, async () => {
                 const payload = await api.addBookToCollection(apiBaseUrl, collectionId, bookId);
                 setResult(payload);
               })
             }
           >
-            Add Book
+            Add Book to Collection
           </button>
         </div>
 
         <div className="card">
-          <h3>Export</h3>
+          <h3>Export Collection</h3>
           <select value={target} onChange={(event) => setTarget(event.target.value as "filesystem" | "obsidian" | "github")}>
             <option value="filesystem">filesystem</option>
             <option value="obsidian">obsidian</option>
@@ -93,20 +86,20 @@ export default function CollectionsPage() {
           <button
             disabled={!collectionsEnabled || !collectionId}
             onClick={() =>
-              void withGuard(async () => {
+              void runIfFeatureEnabled(collectionsEnabled, setError, async () => {
                 const payload = await api.exportCollection(apiBaseUrl, collectionId, target);
                 setResult(payload);
               })
             }
           >
-            Export Collection
+            Start Export
           </button>
         </div>
       </div>
 
       {result ? (
         <div className="card">
-          <h3>Response</h3>
+          <h3>Result</h3>
           <pre>{JSON.stringify(result, null, 2)}</pre>
         </div>
       ) : null}

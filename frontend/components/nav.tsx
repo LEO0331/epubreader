@@ -15,7 +15,7 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="nav">
+    <nav className="nav" aria-label="Primary">
       {ITEMS.map((item) => {
         const isActive = item.href === "/" ? pathname === "/" : pathname?.startsWith(item.href);
         return (

@@ -7,6 +7,8 @@ app:
   debug: false
   log_level: INFO
   request_id_header: X-Request-ID
+  api_key: null
+  ingest_max_bytes: 52428800
   cors_allow_origins: []
 
 storage:

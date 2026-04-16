@@ -21,21 +21,32 @@ export default function IngestPage() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  const submitUrl = async () => {
+  const runIngestAction = async (
+    action: () => Promise<SubmitResult>,
+    fallbackMessage: string,
+  ) => {
     setLoading(true);
     setError("");
     setResult(null);
     try {
-      const response = await api.ingestUrl(apiBaseUrl, {
-        url,
-        source_type: sourceType || undefined,
-      });
+      const response = await action();
       setResult(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unexpected ingest failure");
+      setError(err instanceof Error ? err.message : fallbackMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const submitUrl = async () => {
+    await runIngestAction(
+      () =>
+        api.ingestUrl(apiBaseUrl, {
+          url,
+          source_type: sourceType || undefined,
+        }),
+      "Could not submit this URL. Please try again.",
+    );
   };
 
   const submitUpload = async () => {
@@ -43,18 +54,10 @@ export default function IngestPage() {
       setError("Select an EPUB file first.");
       return;
     }
-
-    setLoading(true);
-    setError("");
-    setResult(null);
-    try {
-      const response = await api.ingestUpload(apiBaseUrl, uploadFile);
-      setResult(response);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unexpected upload failure");
-    } finally {
-      setLoading(false);
-    }
+    await runIngestAction(
+      () => api.ingestUpload(apiBaseUrl, uploadFile),
+      "Upload failed. Please try again.",
+    );
   };
 
   const pollJob = async () => {
@@ -67,55 +70,58 @@ export default function IngestPage() {
       const job = await api.getJob(apiBaseUrl, result.job_id);
       setJobStatus(job.status);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load job status");
+      setError(err instanceof Error ? err.message : "Could not refresh job status.");
     }
   };
 
   return (
     <div>
       <div className="card">
-        <h2>Ingest</h2>
-        <p>Step 1: add a source (EPUB URL, MIZ URL, or upload).</p>
+        <h2 className="page-title">Ingest</h2>
+        <p className="page-lead">Step 1: add your book source (EPUB URL, MIZ URL, or file upload).</p>
       </div>
 
       <div className="grid">
         <div className="card">
-          <h3>Ingest URL</h3>
-          <label className="label" htmlFor="url">Source URL</label>
+          <h3>Use a URL</h3>
+          <p>Paste a direct EPUB link or a supported reading-page link.</p>
+          <label className="label" htmlFor="url">Book URL</label>
           <input id="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://..." />
           <label className="label" htmlFor="sourceType">Source Type (optional)</label>
           <input
             id="sourceType"
             value={sourceType}
             onChange={(event) => setSourceType(event.target.value)}
-            placeholder="miz_books or epub_url"
+            placeholder="Usually auto-detected (example: miz_books)"
           />
-          <button disabled={!url || loading} onClick={submitUrl}>Submit URL</button>
+          <button disabled={!url || loading} onClick={submitUrl}>Start from URL</button>
         </div>
 
         <div className="card">
-          <h3>Upload EPUB</h3>
+          <h3>Upload an EPUB File</h3>
+          <p>Use this option when the file is already on your device.</p>
           <input
             type="file"
             accept=".epub"
             onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)}
           />
-          <button disabled={loading || !uploadFile} onClick={submitUpload}>Upload File</button>
+          <button disabled={loading || !uploadFile} onClick={submitUpload}>Upload and Start</button>
         </div>
       </div>
 
       {result ? (
         <div className="card">
-          <h3>Submission Result</h3>
+          <h3>Book Added Successfully</h3>
+          <p>Save these IDs if you want to return to this book later.</p>
           <ul className="kv">
             <li>Book ID: <span className="mono">{result.book_id}</span></li>
-            <li>Job ID: <span className="mono">{result.job_id}</span></li>
-            <li>Job status: <strong>{jobStatus || "not checked"}</strong></li>
+            <li>Ingestion Job ID: <span className="mono">{result.job_id}</span></li>
+            <li>Current Job Status: <strong>{jobStatus || "Not checked yet"}</strong></li>
           </ul>
           <div className="row">
-            <button className="secondary" onClick={pollJob}>Refresh Job Status</button>
-            <Link href={`/books/${result.book_id}`}><button>Open Book Detail</button></Link>
-            <Link href={`/artifacts/${result.book_id}`}><button className="secondary">Open Artifacts</button></Link>
+            <button className="secondary" onClick={pollJob}>Check Job Status</button>
+            <Link href={`/books/${result.book_id}`}><button>Open Book Page</button></Link>
+            <Link href={`/artifacts/${result.book_id}`}><button className="secondary">Open Artifact Tools</button></Link>
           </div>
         </div>
       ) : null}

@@ -25,40 +25,55 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="card">
-        <h2>Dashboard</h2>
+        <h2 className="page-title">Dashboard</h2>
+        <p className="page-lead">Run your full book workflow here, step by step, without writing code.</p>
+
+        <div className="metric-grid">
+          <article className="metric-card">
+            <p className="metric-label">Runtime</p>
+            <p className="metric-value">{mode.toUpperCase()}</p>
+          </article>
+          <article className="metric-card">
+            <p className="metric-label">Server Status</p>
+            <p className="metric-value">{health}</p>
+          </article>
+          <article className="metric-card">
+            <p className="metric-label">Books in Library</p>
+            <p className="metric-value">{bookCount ?? "N/A"}</p>
+          </article>
+        </div>
+
         <ul className="kv">
-          <li>Runtime mode: <span className="tag">{mode.toUpperCase()}</span></li>
-          <li>Backend: <span className="mono">{apiBaseUrl}</span></li>
-          <li>Connection: <strong>{health}</strong></li>
-          <li>Books found: <strong>{bookCount ?? "Unavailable"}</strong></li>
+          <li>Connected server: <span className="mono">{apiBaseUrl}</span></li>
         </ul>
+
         {mode === "parser" ? <p className="notice">{parserModeMessage()}</p> : null}
       </div>
 
       <div className="grid">
         <div className="card">
-          <h3>Ingest Content</h3>
-          <p>Upload EPUB files or submit supported URLs.</p>
-          <Link href="/ingest"><button>Open Ingest</button></Link>
+          <h3>1. Add a Book</h3>
+          <p>Upload an EPUB file or paste a supported book URL to start.</p>
+          <Link href="/ingest"><button>Start Ingestion</button></Link>
         </div>
 
         <div className="card">
-          <h3>Inspect Books</h3>
-          <p>Review sections and chunks for parse quality checks.</p>
-          <Link href="/ingest"><button className="secondary">Find a book ID</button></Link>
+          <h3>2. Review Parsing Results</h3>
+          <p>Check sections and chunks to confirm the content structure looks right.</p>
+          <Link href="/ingest"><button className="secondary">Find Book ID</button></Link>
         </div>
 
         <div className="card">
-          <h3>Query with Citations</h3>
-          <p>Ask grounded questions from indexed chunks.</p>
+          <h3>3. Ask Questions with Sources</h3>
+          <p>Get grounded answers and see which passages were used as evidence.</p>
           <Link href="/query">
-            <button disabled={!isFeatureEnabled(mode, "query")}>Open Query</button>
+            <button disabled={!isFeatureEnabled(mode, "query")}>Open Q&A</button>
           </Link>
         </div>
 
         <div className="card">
-          <h3>Collections and Export</h3>
-          <p>Group books and export markdown bundles.</p>
+          <h3>4. Organize and Export</h3>
+          <p>Create collections, then export notes for Obsidian, GitHub, or local folders.</p>
           <Link href="/collections">
             <button disabled={!isFeatureEnabled(mode, "collections")}>Open Collections</button>
           </Link>

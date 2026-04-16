@@ -55,3 +55,21 @@ def test_ingest_text_placeholder():
 
         assert response.status_code == 200
         assert response.json()["status"] == "not_implemented"
+
+
+def test_upload_ingest_rejects_non_epub_extension():
+    app = create_app()
+    with TestClient(app) as client:
+        upload = {"file": ("book.txt", b"not-epub", "text/plain")}
+        response = client.post("/api/v1/ingest/upload", files=upload)
+        assert response.status_code == 400
+        assert ".epub" in str(response.json()["detail"])
+
+
+def test_upload_ingest_rejects_oversized_file(monkeypatch):
+    monkeypatch.setenv("APP_INGEST_MAX_BYTES", "10")
+    app = create_app()
+    with TestClient(app) as client:
+        upload = {"file": ("book.epub", b"01234567890", "application/epub+zip")}
+        response = client.post("/api/v1/ingest/upload", files=upload)
+        assert response.status_code == 413

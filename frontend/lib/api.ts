@@ -1,3 +1,5 @@
+import { loadApiKey } from "@/lib/runtime";
+
 export type IngestResponse = { book_id: string; job_id: string };
 export type JobResponse = { id: string; status: string; payload?: Record<string, unknown> };
 
@@ -41,34 +43,59 @@ export type QueryResponse = {
   diagnostics?: Record<string, unknown>;
 };
 
+type ApiErrorPayload = {
+  detail?: string;
+  request_id?: string;
+  error?: { message?: string; request_id?: string };
+};
+
+function buildApiV1Url(apiBaseUrl: string, path: string): string {
+  return `${apiBaseUrl.replace(/\/$/, "")}/api/v1${path}`;
+}
+
+function getApiKeyHeader(): Record<string, string> {
+  const apiKey = loadApiKey();
+  return apiKey ? { "X-API-Key": apiKey } : {};
+}
+
+function formatApiError(status: number, payload: ApiErrorPayload | null): string {
+  let errorDetail = `Request failed (${status})`;
+  if (payload?.detail) {
+    errorDetail = payload.detail;
+  } else if (payload?.error?.message) {
+    errorDetail = payload.error.message;
+  }
+
+  const requestId = payload?.request_id || payload?.error?.request_id;
+  if (requestId) {
+    errorDetail = `${errorDetail} [request_id=${requestId}]`;
+  }
+  return errorDetail;
+}
+
 async function request<T>(
   apiBaseUrl: string,
   path: string,
   init?: RequestInit,
 ): Promise<T> {
-  const url = `${apiBaseUrl.replace(/\/$/, "")}/api/v1${path}`;
+  const url = buildApiV1Url(apiBaseUrl, path);
   const response = await fetch(url, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...getApiKeyHeader(),
       ...(init?.headers ?? {})
     }
   });
 
   if (!response.ok) {
-    let errorDetail = `Request failed (${response.status})`;
+    let payload: ApiErrorPayload | null = null;
     try {
-      const payload = (await response.json()) as { detail?: string; request_id?: string };
-      if (payload.detail) {
-        errorDetail = payload.detail;
-      }
-      if (payload.request_id) {
-        errorDetail = `${errorDetail} [request_id=${payload.request_id}]`;
-      }
+      payload = (await response.json()) as ApiErrorPayload;
     } catch {
       // Keep default text when response is not JSON.
     }
-    throw new Error(errorDetail);
+    throw new Error(formatApiError(response.status, payload));
   }
 
   return (await response.json()) as T;
@@ -85,12 +112,13 @@ export const api = {
     });
   },
   async ingestUpload(apiBaseUrl: string, file: File): Promise<IngestResponse> {
-    const url = `${apiBaseUrl.replace(/\/$/, "")}/api/v1/ingest/upload`;
+    const url = buildApiV1Url(apiBaseUrl, "/ingest/upload");
     const form = new FormData();
     form.append("file", file);
 
     const response = await fetch(url, {
       method: "POST",
+      headers: getApiKeyHeader(),
       body: form
     });
 

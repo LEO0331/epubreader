@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRuntime } from "@/components/runtime-provider";
 import { api } from "@/lib/api";
 import { isFeatureEnabled, parserModeMessage } from "@/lib/runtime";
+import { runIfFeatureEnabled } from "@/lib/mode-guard";
 
 function splitCsv(raw: string): string[] {
   return raw
@@ -32,30 +33,22 @@ export default function QueryPage() {
     top_k: topK,
   };
 
-  const guarded = async (work: () => Promise<void>) => {
-    if (!queryEnabled) {
-      setError(parserModeMessage());
-      return;
-    }
-    setError("");
-    await work();
-  };
-
   return (
     <div>
       <div className="card">
-        <h2>Query</h2>
-        <p>Ask a question and inspect evidence citations.</p>
+        <h2 className="page-title">Query</h2>
+        <p className="page-lead">Ask a question in plain language and review source-backed answers.</p>
         {!queryEnabled ? <p className="notice">{parserModeMessage()}</p> : null}
       </div>
 
       <div className="card">
-        <label className="label" htmlFor="question">Question</label>
+        <p>Tip: start with one clear question, then narrow by book or collection if needed.</p>
+        <label className="label" htmlFor="question">Your Question</label>
         <textarea id="question" rows={4} value={question} onChange={(event) => setQuestion(event.target.value)} />
 
         <div className="row">
           <div>
-            <label className="label" htmlFor="bookIds">Book IDs (comma-separated)</label>
+            <label className="label" htmlFor="bookIds">Book IDs (comma-separated, optional)</label>
             <input id="bookIds" value={bookIds} onChange={(event) => setBookIds(event.target.value)} />
           </div>
           <div>
@@ -79,38 +72,38 @@ export default function QueryPage() {
           <button
             disabled={!queryEnabled || !question}
             onClick={() =>
-              void guarded(async () => {
+              void runIfFeatureEnabled(queryEnabled, setError, async () => {
                 const response = await api.previewQuery(apiBaseUrl, payload);
                 setPreview(response);
               })
             }
           >
-            Preview Retrieval
+            Preview Evidence
           </button>
           <button
             disabled={!queryEnabled || !question}
             onClick={() =>
-              void guarded(async () => {
+              void runIfFeatureEnabled(queryEnabled, setError, async () => {
                 const response = await api.runQuery(apiBaseUrl, payload);
                 setAnswer(response as Record<string, unknown>);
               })
             }
           >
-            Generate Answer
+            Generate Answer with Citations
           </button>
         </div>
       </div>
 
       {preview ? (
         <div className="card">
-          <h3>Preview Result</h3>
+          <h3>Evidence Preview</h3>
           <pre>{JSON.stringify(preview, null, 2)}</pre>
         </div>
       ) : null}
 
       {answer ? (
         <div className="card">
-          <h3>Answer + Citations</h3>
+          <h3>Answer and Citations</h3>
           <pre>{JSON.stringify(answer, null, 2)}</pre>
         </div>
       ) : null}

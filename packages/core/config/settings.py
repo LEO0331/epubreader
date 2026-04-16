@@ -16,6 +16,8 @@ class AppConfig(BaseModel):
     log_level: str = "INFO"
     request_id_header: str = "X-Request-ID"
     cors_allow_origins: list[str] = Field(default_factory=list)
+    api_key: str | None = None
+    ingest_max_bytes: int = 50 * 1024 * 1024
 
 
 class StorageConfig(BaseModel):

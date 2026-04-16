@@ -96,6 +96,8 @@ uvicorn apps.api.main:create_app --factory --host 0.0.0.0 --port $PORT
   - `APP_DATABASE_URL=sqlite:////var/data/app.db`
   - `APP_CONFIG_DIR=/opt/render/project/src/configs`
   - `APP_MODELS_PROFILE=api`
+  - `APP_API_KEY=<strong-random-value>` (optional but recommended for public deployments)
+  - `APP_INGEST_MAX_BYTES=52428800` (optional upload/fetch size guard)
   - `APP_CORS_ALLOW_ORIGINS=https://<vercel-domain>,https://<optional-preview-domain>`
 
 ### 2) Deploy Frontend to Vercel
@@ -135,3 +137,6 @@ Yes. If no generation API key is available, run in **parser mode**.
 - `POST /api/v1/collections/{collection_id}/books`
 - `DELETE /api/v1/collections/{collection_id}/books/{book_id}`
 - `POST /api/v1/collections/{collection_id}/export`
+
+If `APP_API_KEY` is configured, include `X-API-Key: <value>` on all API requests except health checks.
+In non-local environments (`APP_ENV` not `local/dev/test`), `APP_API_KEY` is required.

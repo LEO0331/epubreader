@@ -7,14 +7,16 @@ import { api } from "@/lib/api";
 import { RuntimeMode } from "@/lib/runtime";
 
 export default function SettingsPage() {
-  const { mode, setMode, apiBaseUrl, setApiBaseUrl } = useRuntime();
+  const { mode, setMode, apiBaseUrl, setApiBaseUrl, apiKey, setApiKey } = useRuntime();
 
   const [pendingUrl, setPendingUrl] = useState(apiBaseUrl);
+  const [pendingApiKey, setPendingApiKey] = useState(apiKey);
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState<string>("");
 
   const saveSettings = () => {
     setApiBaseUrl(pendingUrl);
+    setApiKey(pendingApiKey);
     setStatus("Settings saved locally.");
     setError("");
   };
@@ -34,8 +36,8 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="card">
-        <h2>Settings</h2>
-        <p>Set your backend endpoint and runtime mode.</p>
+        <h2 className="page-title">Settings</h2>
+        <p className="page-lead">Choose how this app connects and which features should be available.</p>
       </div>
 
       <div className="card">
@@ -57,10 +59,19 @@ export default function SettingsPage() {
           placeholder="https://your-render-service.onrender.com"
         />
 
+        <label className="label" htmlFor="apiKey">API Key (optional)</label>
+        <input
+          id="apiKey"
+          type="password"
+          value={pendingApiKey}
+          onChange={(event) => setPendingApiKey(event.target.value)}
+          placeholder="Used automatically when your backend requires authentication"
+        />
+
         <div className="row">
-          <button onClick={saveSettings}>Save Settings</button>
+          <button onClick={saveSettings}>Save Changes</button>
           <button className="secondary" onClick={() => void checkConnection()}>
-            Connectivity Check
+            Test Connection
           </button>
         </div>
 
