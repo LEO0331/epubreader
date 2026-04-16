@@ -1,0 +1,281 @@
+{
+  "info": {
+    "_postman_id": "b4ea8f8f-2f67-4a8b-a835-4f4c72a655dd",
+    "name": "book-qa-library API",
+    "description": "Collection for all available book-qa-library API endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "apiVersion", "value": "api/v1" },
+    { "key": "bookId", "value": "" },
+    { "key": "jobId", "value": "" },
+    { "key": "collectionId", "value": "" },
+    { "key": "artifactType", "value": "summary" },
+    { "key": "apiKey", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ingest",
+      "item": [
+        {
+          "name": "POST /ingest/url",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://books.miz.com.tw/read/example\",\n  \"source_type\": \"miz_books\"\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/ingest/url"
+          }
+        },
+        {
+          "name": "POST /ingest/upload",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/ingest/upload"
+          }
+        },
+        {
+          "name": "POST /ingest/text",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"hello\"\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/ingest/text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "GET /jobs/{job_id}",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/jobs/{{jobId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "GET /books",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/books?limit=50&offset=0"
+          }
+        },
+        {
+          "name": "GET /books/{book_id}",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/books/{{bookId}}"
+          }
+        },
+        {
+          "name": "GET /books/{book_id}/sections",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/books/{{bookId}}/sections?limit=20&offset=0"
+          }
+        },
+        {
+          "name": "GET /books/{book_id}/chunks",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/books/{{bookId}}/chunks?limit=20&offset=0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Artifacts",
+      "item": [
+        {
+          "name": "POST /books/{book_id}/artifacts/build",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"include_skill\": false\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/books/{{bookId}}/artifacts/build"
+          }
+        },
+        {
+          "name": "GET /books/{book_id}/artifacts",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/books/{{bookId}}/artifacts"
+          }
+        },
+        {
+          "name": "GET /books/{book_id}/artifacts/{artifact_type}",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/books/{{bookId}}/artifacts/{{artifactType}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Query",
+      "item": [
+        {
+          "name": "POST /query/preview",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What is this book about?\",\n  \"book_ids\": [\"{{bookId}}\"],\n  \"collection_id\": null,\n  \"top_k\": 5\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/query/preview"
+          }
+        },
+        {
+          "name": "POST /query",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What is this book about?\",\n  \"book_ids\": [\"{{bookId}}\"],\n  \"collection_id\": null,\n  \"top_k\": 5\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/query"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Collections",
+      "item": [
+        {
+          "name": "POST /collections",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Collection\"\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/collections"
+          }
+        },
+        {
+          "name": "GET /collections",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/collections"
+          }
+        },
+        {
+          "name": "GET /collections/{collection_id}",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/{{apiVersion}}/collections/{{collectionId}}"
+          }
+        },
+        {
+          "name": "POST /collections/{collection_id}/books",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book_id\": \"{{bookId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/collections/{{collectionId}}/books"
+          }
+        },
+        {
+          "name": "DELETE /collections/{collection_id}/books/{book_id}",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/{{apiVersion}}/collections/{{collectionId}}/books/{{bookId}}"
+          }
+        },
+        {
+          "name": "POST /collections/{collection_id}/export",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"target\": \"obsidian\"\n}"
+            },
+            "url": "{{baseUrl}}/{{apiVersion}}/collections/{{collectionId}}/export"
+          }
+        }
+      ]
+    }
+  ]
+}

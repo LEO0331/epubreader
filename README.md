@@ -62,6 +62,32 @@ cp .env.example .env
 make run
 ```
 
+## Local Ollama Setup (For AI Features)
+If you want artifact generation and Q&A locally, run Ollama:
+
+1. Install Ollama from [ollama.com](https://ollama.com/).
+2. Start Ollama:
+```bash
+ollama serve
+```
+3. Pull a model (example):
+```bash
+ollama pull llama3.1
+```
+4. Ensure config uses local profile (`configs/models.local.yaml`):
+```yaml
+llm:
+  provider: ollama
+  model: llama3.1
+  timeout_seconds: 60
+```
+5. Ensure backend uses local models profile:
+```bash
+APP_MODELS_PROFILE=local
+```
+
+Without Ollama, parser-only features still work (ingest/parse/chunk inspection), but AI generation/query features will be limited.
+
 Health check:
 ```bash
 curl -s http://127.0.0.1:8000/api/v1/health
@@ -140,3 +166,18 @@ Yes. If no generation API key is available, run in **parser mode**.
 
 If `APP_API_KEY` is configured, include `X-API-Key: <value>` on all API requests except health checks.
 In non-local environments (`APP_ENV` not `local/dev/test`), `APP_API_KEY` is required.
+
+## Postman Collection
+- Import book-qa-library.postman_collection.json
+- Set collection variables:
+  - `baseUrl` (e.g. `http://127.0.0.1:8000` or your Render URL)
+  - `apiKey` (only if backend auth is enabled)
+  - `bookId`, `jobId`, `collectionId` as needed after creating resources
+
+## Test Coverage
+Backend coverage is measured for `apps` + `packages` and enforced at **85% minimum**.
+
+Run coverage locally:
+```bash
+make coverage
+```
