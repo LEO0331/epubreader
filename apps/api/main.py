@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from apps.api.errors import register_exception_handlers
 from apps.api.lifespan import lifespan
@@ -21,6 +22,14 @@ def create_app() -> FastAPI:
     configure_logging(settings.app.log_level)
 
     app = FastAPI(title=settings.app.name, version=settings.app.version, lifespan=lifespan)
+    if settings.app.cors_allow_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.app.cors_allow_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
     app.add_middleware(RequestIdMiddleware, header_name=settings.app.request_id_header)
     register_exception_handlers(app)
 

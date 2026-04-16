@@ -37,6 +37,10 @@ def _resolve_config_dir(config_dir: str | None = None) -> Path:
     return Path("configs").resolve()
 
 
+def _parse_csv(value: str) -> list[str]:
+    return [part.strip() for part in value.split(",") if part.strip()]
+
+
 def load_settings(config_dir: str | None = None) -> AppSettings:
     base_dir = _resolve_config_dir(config_dir)
     app_data = _read_yaml(base_dir / "app.yaml")
@@ -55,6 +59,11 @@ def load_settings(config_dir: str | None = None) -> AppSettings:
             "debug": _env_bool("APP_DEBUG", app_cfg.debug),
             "log_level": os.getenv("APP_LOG_LEVEL", app_cfg.log_level),
             "request_id_header": os.getenv("APP_REQUEST_ID_HEADER", app_cfg.request_id_header),
+            "cors_allow_origins": (
+                _parse_csv(os.environ["APP_CORS_ALLOW_ORIGINS"])
+                if "APP_CORS_ALLOW_ORIGINS" in os.environ
+                else app_cfg.cors_allow_origins
+            ),
         }
     )
 

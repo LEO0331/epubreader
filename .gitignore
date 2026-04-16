@@ -17,6 +17,12 @@ venv/
 .env
 data/*.db
 
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/coverage/
+frontend/.env.local
+
 # OS/editor
 .DS_Store
 .vscode/

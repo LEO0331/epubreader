@@ -7,6 +7,7 @@ app:
   debug: false
   log_level: INFO
   request_id_header: X-Request-ID
+  cors_allow_origins: []
 
 storage:
   database_url: sqlite:///./data/app.db

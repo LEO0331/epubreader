@@ -15,6 +15,7 @@ class AppConfig(BaseModel):
     debug: bool = False
     log_level: str = "INFO"
     request_id_header: str = "X-Request-ID"
+    cors_allow_origins: list[str] = Field(default_factory=list)
 
 
 class StorageConfig(BaseModel):
