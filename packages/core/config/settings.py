@@ -18,6 +18,16 @@ class AppConfig(BaseModel):
     cors_allow_origins: list[str] = Field(default_factory=list)
     api_key: str | None = None
     ingest_max_bytes: int = 50 * 1024 * 1024
+    ocr_enabled: bool = True
+    ocr_langs: str = "chi_tra+eng"
+    ocr_min_text_chars: int = 80
+    ocr_tesseract_cmd: str | None = None
+    ocr_max_pages: int = 0
+    ocr_page_timeout_seconds: int = 0
+    ocr_total_timeout_seconds: int = 0
+    ocr_isolate_worker: bool = False
+    ingest_host_allowlist_enabled: bool = False
+    ingest_host_allowlist: list[str] = Field(default_factory=list)
 
 
 class StorageConfig(BaseModel):

@@ -6,9 +6,11 @@ from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
+from packages.core.config.loader import get_settings
 from packages.core.models.enums import ArtifactType, BookStatus
 from packages.parsing.epub_parser import parse_epub
 from packages.parsing.html_parser import parse_html
+from packages.parsing.pdf_parser import parse_pdf
 from packages.storage.repositories.artifacts_repo import ArtifactsRepository
 from packages.storage.repositories.books_repo import BooksRepository
 from packages.storage.repositories.sections_repo import SectionsRepository
@@ -79,6 +81,19 @@ class ParsingService:
     def _parse_by_source(self, source_type: str, snapshot_path: Path) -> dict[str, object]:
         if source_type in {"epub_url", "uploaded_epub"}:
             return parse_epub(snapshot_path)
+        if source_type in {"pdf_url", "uploaded_pdf"}:
+            settings = get_settings()
+            return parse_pdf(
+                snapshot_path,
+                ocr_enabled=settings.app.ocr_enabled,
+                ocr_langs=settings.app.ocr_langs,
+                ocr_min_text_chars=settings.app.ocr_min_text_chars,
+                ocr_tesseract_cmd=settings.app.ocr_tesseract_cmd,
+                ocr_max_pages=settings.app.ocr_max_pages,
+                ocr_page_timeout_seconds=settings.app.ocr_page_timeout_seconds,
+                ocr_total_timeout_seconds=settings.app.ocr_total_timeout_seconds,
+                ocr_isolate_worker=settings.app.ocr_isolate_worker,
+            )
         if source_type == "miz_books":
             return parse_html(snapshot_path.read_bytes())
         raise ValueError(f"No parser for source_type={source_type}")

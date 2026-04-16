@@ -9,6 +9,16 @@ app:
   request_id_header: X-Request-ID
   api_key: null
   ingest_max_bytes: 52428800
+  ocr_enabled: true
+  ocr_langs: chi_tra+eng
+  ocr_min_text_chars: 80
+  ocr_tesseract_cmd: null
+  ocr_max_pages: 0
+  ocr_page_timeout_seconds: 0
+  ocr_total_timeout_seconds: 0
+  ocr_isolate_worker: false
+  ingest_host_allowlist_enabled: false
+  ingest_host_allowlist: []
   cors_allow_origins: []
 
 storage:

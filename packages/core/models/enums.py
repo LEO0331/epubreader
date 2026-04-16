@@ -6,6 +6,8 @@ from enum import StrEnum
 class SourceType(StrEnum):
     EPUB_URL = "epub_url"
     UPLOADED_EPUB = "uploaded_epub"
+    PDF_URL = "pdf_url"
+    UPLOADED_PDF = "uploaded_pdf"
     MIZ_BOOKS = "miz_books"
     PLAIN_TEXT = "plain_text"
 

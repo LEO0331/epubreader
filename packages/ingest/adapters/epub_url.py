@@ -10,8 +10,16 @@ from packages.ingest.adapters.url_security import validate_public_http_url
 
 
 class EpubUrlAdapter(SourceAdapter):
-    def __init__(self, *, max_bytes: int = 50 * 1024 * 1024):
+    def __init__(
+        self,
+        *,
+        max_bytes: int = 50 * 1024 * 1024,
+        allowlist_enabled: bool = False,
+        allowlist_hosts: list[str] | None = None,
+    ):
         self.max_bytes = max_bytes
+        self.allowlist_enabled = allowlist_enabled
+        self.allowlist_hosts = allowlist_hosts or []
 
     def can_handle(self, *, source_type: str, source_ref: str) -> bool:
         return source_type == "epub_url" and source_ref.startswith(("http://", "https://"))
@@ -19,7 +27,11 @@ class EpubUrlAdapter(SourceAdapter):
     def fetch(self, *, source_ref: str, upload_bytes: bytes | None = None) -> RawSourcePayload:
         if upload_bytes is not None:
             raise ValueError("upload_bytes is not supported for epub_url adapter")
-        validate_public_http_url(source_ref)
+        validate_public_http_url(
+            source_ref,
+            allowlist_enabled=self.allowlist_enabled,
+            allowlist_hosts=self.allowlist_hosts,
+        )
 
         response = httpx.get(source_ref, timeout=30, follow_redirects=False)
         if 300 <= response.status_code < 400:

@@ -63,6 +63,35 @@ def load_settings(config_dir: str | None = None) -> AppSettings:
             "ingest_max_bytes": int(
                 os.getenv("APP_INGEST_MAX_BYTES", str(app_cfg.ingest_max_bytes))
             ),
+            "ocr_enabled": _env_bool("APP_OCR_ENABLED", app_cfg.ocr_enabled),
+            "ocr_langs": os.getenv("APP_OCR_LANGS", app_cfg.ocr_langs),
+            "ocr_min_text_chars": int(
+                os.getenv("APP_OCR_MIN_TEXT_CHARS", str(app_cfg.ocr_min_text_chars))
+            ),
+            "ocr_tesseract_cmd": os.getenv("APP_OCR_TESSERACT_CMD", app_cfg.ocr_tesseract_cmd),
+            "ocr_max_pages": int(os.getenv("APP_OCR_MAX_PAGES", str(app_cfg.ocr_max_pages))),
+            "ocr_page_timeout_seconds": int(
+                os.getenv(
+                    "APP_OCR_PAGE_TIMEOUT_SECONDS",
+                    str(app_cfg.ocr_page_timeout_seconds),
+                )
+            ),
+            "ocr_total_timeout_seconds": int(
+                os.getenv(
+                    "APP_OCR_TOTAL_TIMEOUT_SECONDS",
+                    str(app_cfg.ocr_total_timeout_seconds),
+                )
+            ),
+            "ocr_isolate_worker": _env_bool("APP_OCR_ISOLATE_WORKER", app_cfg.ocr_isolate_worker),
+            "ingest_host_allowlist_enabled": _env_bool(
+                "APP_INGEST_HOST_ALLOWLIST_ENABLED",
+                app_cfg.ingest_host_allowlist_enabled,
+            ),
+            "ingest_host_allowlist": (
+                _parse_csv(os.environ["APP_INGEST_HOST_ALLOWLIST"])
+                if "APP_INGEST_HOST_ALLOWLIST" in os.environ
+                else app_cfg.ingest_host_allowlist
+            ),
             "cors_allow_origins": (
                 _parse_csv(os.environ["APP_CORS_ALLOW_ORIGINS"])
                 if "APP_CORS_ALLOW_ORIGINS" in os.environ

@@ -63,7 +63,7 @@ def test_upload_ingest_rejects_non_epub_extension():
         upload = {"file": ("book.txt", b"not-epub", "text/plain")}
         response = client.post("/api/v1/ingest/upload", files=upload)
         assert response.status_code == 400
-        assert ".epub" in str(response.json()["detail"])
+        assert ".epub or .pdf" in str(response.json()["detail"])
 
 
 def test_upload_ingest_rejects_oversized_file(monkeypatch):
@@ -73,3 +73,98 @@ def test_upload_ingest_rejects_oversized_file(monkeypatch):
         upload = {"file": ("book.epub", b"01234567890", "application/epub+zip")}
         response = client.post("/api/v1/ingest/upload", files=upload)
         assert response.status_code == 413
+
+
+def test_upload_pdf_ingest_and_job_lookup(monkeypatch):
+    monkeypatch.setattr(
+        "packages.parsing.parsing_service.parse_pdf",
+        lambda *args, **kwargs: {
+            "metadata": {"title": None, "author": None, "language": None, "toc": []},
+            "sections": [
+                {
+                    "ordinal": 0,
+                    "heading": "Page 1",
+                    "heading_path": ["Page 1"],
+                    "content": "PDF text",
+                    "source_locator": "page:1",
+                }
+            ],
+        },
+    )
+
+    app = create_app()
+    with TestClient(app) as client:
+        upload = {"file": ("book.pdf", b"%PDF-1.4\\n", "application/pdf")}
+        response = client.post("/api/v1/ingest/upload", files=upload)
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert "book_id" in payload
+        assert "job_id" in payload
+
+        job_resp = client.get(f"/api/v1/jobs/{payload['job_id']}")
+        assert job_resp.status_code == 200
+        assert job_resp.json()["status"] == "completed"
+
+
+def test_ingest_url_infers_pdf_source_type(monkeypatch):
+    captured: dict[str, str] = {}
+
+    def _fake_ingest_url(self, *, source_type: str, url: str):  # noqa: ANN001
+        captured["source_type"] = source_type
+        captured["url"] = url
+        return {"book_id": "book-123", "job_id": "job-123"}
+
+    monkeypatch.setattr("apps.api.routes.ingest.IngestionService.ingest_url", _fake_ingest_url)
+
+    app = create_app()
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/ingest/url",
+            json={"url": "https://example.com/sample.pdf"},
+        )
+        assert response.status_code == 200
+        assert captured["source_type"] == "pdf_url"
+        assert captured["url"] == "https://example.com/sample.pdf"
+
+
+def test_ingest_url_infers_pdf_source_type_with_query(monkeypatch):
+    captured: dict[str, str] = {}
+
+    def _fake_ingest_url(self, *, source_type: str, url: str):  # noqa: ANN001
+        captured["source_type"] = source_type
+        captured["url"] = url
+        return {"book_id": "book-123", "job_id": "job-123"}
+
+    monkeypatch.setattr("apps.api.routes.ingest.IngestionService.ingest_url", _fake_ingest_url)
+
+    app = create_app()
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/ingest/url",
+            json={"url": "https://example.com/sample.pdf?download=1"},
+        )
+        assert response.status_code == 200
+        assert captured["source_type"] == "pdf_url"
+        assert captured["url"] == "https://example.com/sample.pdf?download=1"
+
+
+def test_ingest_url_infers_epub_source_type_with_query(monkeypatch):
+    captured: dict[str, str] = {}
+
+    def _fake_ingest_url(self, *, source_type: str, url: str):  # noqa: ANN001
+        captured["source_type"] = source_type
+        captured["url"] = url
+        return {"book_id": "book-123", "job_id": "job-123"}
+
+    monkeypatch.setattr("apps.api.routes.ingest.IngestionService.ingest_url", _fake_ingest_url)
+
+    app = create_app()
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/ingest/url",
+            json={"url": "https://example.com/sample.epub?signature=abc"},
+        )
+        assert response.status_code == 200
+        assert captured["source_type"] == "epub_url"
+        assert captured["url"] == "https://example.com/sample.epub?signature=abc"

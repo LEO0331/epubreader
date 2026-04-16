@@ -16,6 +16,9 @@ venv/
 # Environment
 .env
 data/*.db
+data/*
+!data/.gitkeep
+!data/**/.gitkeep
 
 # Frontend
 frontend/node_modules/

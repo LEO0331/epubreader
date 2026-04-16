@@ -27,6 +27,53 @@ def test_validate_public_http_url_rejects_hostname_with_private_dns(monkeypatch)
         validate_public_http_url("https://example.com/book.epub")
 
 
+def test_validate_public_http_url_allowlist_allows_subdomain(monkeypatch):
+    def fake_getaddrinfo(*args, **kwargs):
+        return [(None, None, None, None, ("8.8.8.8", 0))]
+
+    monkeypatch.setattr(
+        "packages.ingest.adapters.url_security.socket.getaddrinfo",
+        fake_getaddrinfo,
+    )
+    validate_public_http_url(
+        "https://cdn.example.com/book.epub",
+        allowlist_enabled=True,
+        allowlist_hosts=["example.com"],
+    )
+
+
+def test_validate_public_http_url_allowlist_rejects_non_member(monkeypatch):
+    def fake_getaddrinfo(*args, **kwargs):
+        return [(None, None, None, None, ("8.8.8.8", 0))]
+
+    monkeypatch.setattr(
+        "packages.ingest.adapters.url_security.socket.getaddrinfo",
+        fake_getaddrinfo,
+    )
+    with pytest.raises(ValueError):
+        validate_public_http_url(
+            "https://cdn.example.com/book.epub",
+            allowlist_enabled=True,
+            allowlist_hosts=["other.com"],
+        )
+
+
+def test_validate_public_http_url_allowlist_requires_hosts(monkeypatch):
+    def fake_getaddrinfo(*args, **kwargs):
+        return [(None, None, None, None, ("8.8.8.8", 0))]
+
+    monkeypatch.setattr(
+        "packages.ingest.adapters.url_security.socket.getaddrinfo",
+        fake_getaddrinfo,
+    )
+    with pytest.raises(ValueError):
+        validate_public_http_url(
+            "https://example.com/book.epub",
+            allowlist_enabled=True,
+            allowlist_hosts=[],
+        )
+
+
 @pytest.mark.parametrize(
     "url",
     [

@@ -24,6 +24,10 @@ dependencies = [
   "httpx>=0.27.2",
   "pyyaml>=6.0.2",
   "python-multipart>=0.0.20",
+  "pypdf>=5.0.0",
+  "pytesseract>=0.3.13",
+  "pdf2image>=1.17.0",
+  "pillow>=10.4.0",
 ]
 
 [project.optional-dependencies]
@@ -71,6 +75,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["ebooklib"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["pytesseract", "pdf2image", "pypdf"]
 ignore_missing_imports = true
 
 [tool.hatch.build.targets.wheel]

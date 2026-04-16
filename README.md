@@ -88,6 +88,43 @@ APP_MODELS_PROFILE=local
 
 Without Ollama, parser-only features still work (ingest/parse/chunk inspection), but AI generation/query features will be limited.
 
+## PDF + OCR Setup (Mandarin/English)
+PDF ingest is supported via the same ingest endpoints.
+
+### Install system packages (Linux / Render-like)
+- `tesseract-ocr`
+- `tesseract-ocr-chi-tra`
+- `tesseract-ocr-eng`
+- `poppler-utils`
+
+### Configure OCR defaults
+```bash
+APP_OCR_ENABLED=true
+APP_OCR_LANGS=chi_tra+eng
+APP_OCR_MIN_TEXT_CHARS=80
+# optional custom binary path
+APP_OCR_TESSERACT_CMD=
+# optional hardening limits (0 = disabled)
+APP_OCR_MAX_PAGES=0
+APP_OCR_PAGE_TIMEOUT_SECONDS=0
+APP_OCR_TOTAL_TIMEOUT_SECONDS=0
+APP_OCR_ISOLATE_WORKER=false
+# optional URL ingestion host allowlist mode
+APP_INGEST_HOST_ALLOWLIST_ENABLED=false
+APP_INGEST_HOST_ALLOWLIST=
+```
+
+### OCR behavior
+- Parser extracts embedded PDF text first.
+- If a page has very little text (`APP_OCR_MIN_TEXT_CHARS`), OCR fallback is attempted.
+- If OCR runtime is unavailable, parsing continues with embedded-text extraction (graceful degrade), and OCR availability is marked in parsed metadata.
+- Optional hardening:
+  - `APP_OCR_MAX_PAGES`, `APP_OCR_PAGE_TIMEOUT_SECONDS`, `APP_OCR_TOTAL_TIMEOUT_SECONDS` limit OCR workload.
+  - `APP_OCR_ISOLATE_WORKER=true` runs OCR in a subprocess per page for safer isolation.
+  - `APP_INGEST_HOST_ALLOWLIST_ENABLED=true` + `APP_INGEST_HOST_ALLOWLIST=example.com,cdn.example.com` restrict URL ingest hosts.
+
+All hardening controls above are opt-in and disabled by default, so existing local and web deployments keep current behavior unless explicitly enabled.
+
 Health check:
 ```bash
 curl -s http://127.0.0.1:8000/api/v1/health
@@ -166,6 +203,78 @@ Yes. If no generation API key is available, run in **parser mode**.
 
 If `APP_API_KEY` is configured, include `X-API-Key: <value>` on all API requests except health checks.
 In non-local environments (`APP_ENV` not `local/dev/test`), `APP_API_KEY` is required.
+
+## User Flow (API Order)
+Use this order when calling APIs manually (Postman/curl/frontend).
+
+1. Health check
+```http
+GET /api/v1/health
+```
+
+2. Ingest source (choose one)
+```http
+POST /api/v1/ingest/upload
+POST /api/v1/ingest/url
+```
+Examples:
+- URL: `.epub`, `.pdf`, or supported `miz_books` page URL
+- Upload: `.epub` or `.pdf`
+Sample requests:
+```bash
+# PDF URL (auto-detected as pdf_url)
+curl -X POST "$BASE_URL/api/v1/ingest/url" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: $API_KEY" \
+  -d '{"url":"https://example.com/book.pdf"}'
+
+# Uploaded PDF (auto-detected as uploaded_pdf from filename)
+curl -X POST "$BASE_URL/api/v1/ingest/upload" \
+  -H "X-API-Key: $API_KEY" \
+  -F "file=@/absolute/path/book.pdf"
+```
+Response returns:
+- `book_id`
+- `job_id`
+
+3. Check ingest job status
+```http
+GET /api/v1/jobs/{job_id}
+```
+
+4. Inspect parsed content
+```http
+GET /api/v1/books/{book_id}
+GET /api/v1/books/{book_id}/sections
+GET /api/v1/books/{book_id}/chunks
+```
+
+5. Build artifacts (API mode)
+```http
+POST /api/v1/books/{book_id}/artifacts/build
+GET /api/v1/books/{book_id}/artifacts
+GET /api/v1/books/{book_id}/artifacts/{artifact_type}
+```
+
+6. Ask questions with evidence (API mode)
+```http
+POST /api/v1/query/preview
+POST /api/v1/query
+```
+Use `book_ids` or `collection_id` in request body.
+
+7. Collections + export (API mode)
+```http
+POST /api/v1/collections
+POST /api/v1/collections/{collection_id}/books
+POST /api/v1/collections/{collection_id}/export
+```
+Optional:
+```http
+GET /api/v1/collections
+GET /api/v1/collections/{collection_id}
+DELETE /api/v1/collections/{collection_id}/books/{book_id}
+```
 
 ## Postman Collection
 - Import book-qa-library.postman_collection.json

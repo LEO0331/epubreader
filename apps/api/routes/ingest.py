@@ -25,11 +25,23 @@ class IngestResponse(BaseModel):
 
 def _detect_source_type(url: str) -> str:
     parsed = urlparse(url)
+    path = parsed.path.lower()
     if parsed.netloc == "books.miz.com.tw" and parsed.path.startswith("/read/"):
         return "miz_books"
-    if url.lower().endswith(".epub"):
+    if path.endswith(".pdf"):
+        return "pdf_url"
+    if path.endswith(".epub"):
         return "epub_url"
     raise ValueError("Unable to infer source_type for URL; provide source_type explicitly")
+
+
+def _detect_upload_source_type(filename: str) -> str:
+    lower = filename.lower()
+    if lower.endswith(".epub"):
+        return "uploaded_epub"
+    if lower.endswith(".pdf"):
+        return "uploaded_pdf"
+    raise ValueError("Uploaded file must be an .epub or .pdf file")
 
 
 @router.post("/url", response_model=IngestResponse)
@@ -40,6 +52,8 @@ def ingest_url(payload: IngestUrlRequest, db: Session = Depends(get_db_session))
         db,
         data_root=settings.storage.data_dir,
         max_ingest_bytes=settings.app.ingest_max_bytes,
+        host_allowlist_enabled=settings.app.ingest_host_allowlist_enabled,
+        host_allowlist=settings.app.ingest_host_allowlist,
     )
     try:
         result = service.ingest_url(source_type=source_type, url=payload.url)
@@ -55,8 +69,10 @@ async def ingest_upload(
 ) -> IngestResponse:
     if not file.filename:
         raise HTTPException(status_code=400, detail="Uploaded file must have a filename")
-    if not file.filename.lower().endswith(".epub"):
-        raise HTTPException(status_code=400, detail="Uploaded file must be an .epub file")
+    try:
+        source_type = _detect_upload_source_type(file.filename)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     settings = get_settings()
     payload = await file.read(settings.app.ingest_max_bytes + 1)
@@ -67,8 +83,14 @@ async def ingest_upload(
         db,
         data_root=settings.storage.data_dir,
         max_ingest_bytes=settings.app.ingest_max_bytes,
+        host_allowlist_enabled=settings.app.ingest_host_allowlist_enabled,
+        host_allowlist=settings.app.ingest_host_allowlist,
     )
-    result = service.ingest_upload(filename=file.filename, upload_bytes=payload)
+    result = service.ingest_upload(
+        source_type=source_type,
+        filename=file.filename,
+        upload_bytes=payload,
+    )
     return IngestResponse(**result)
 
 

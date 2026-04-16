@@ -13,7 +13,9 @@ from packages.ingest.adapters import (
     AdapterRegistry,
     EpubUrlAdapter,
     MizBooksAdapter,
+    PdfUrlAdapter,
     UploadedEpubAdapter,
+    UploadedPdfAdapter,
 )
 from packages.parsing import ParsingService
 from packages.quality import ParseQualityScoringService
@@ -23,17 +25,39 @@ from packages.storage.repositories.books_repo import BooksRepository
 
 
 class IngestionService:
-    def __init__(self, session: Session, data_root: str, max_ingest_bytes: int = 50 * 1024 * 1024):
+    def __init__(
+        self,
+        session: Session,
+        data_root: str,
+        max_ingest_bytes: int = 50 * 1024 * 1024,
+        host_allowlist_enabled: bool = False,
+        host_allowlist: list[str] | None = None,
+    ):
         self.session = session
         self.books_repo = BooksRepository(session)
         self.artifacts_repo = ArtifactsRepository(session)
         self.jobs = JobService(session)
         # Keep adapter size limits aligned with route-level limits.
+        normalized_allowlist = host_allowlist or []
         self.registry = AdapterRegistry(
             adapters=[
-                EpubUrlAdapter(max_bytes=max_ingest_bytes),
+                EpubUrlAdapter(
+                    max_bytes=max_ingest_bytes,
+                    allowlist_enabled=host_allowlist_enabled,
+                    allowlist_hosts=normalized_allowlist,
+                ),
                 UploadedEpubAdapter(),
-                MizBooksAdapter(max_bytes=max_ingest_bytes),
+                PdfUrlAdapter(
+                    max_bytes=max_ingest_bytes,
+                    allowlist_enabled=host_allowlist_enabled,
+                    allowlist_hosts=normalized_allowlist,
+                ),
+                UploadedPdfAdapter(),
+                MizBooksAdapter(
+                    max_bytes=max_ingest_bytes,
+                    allowlist_enabled=host_allowlist_enabled,
+                    allowlist_hosts=normalized_allowlist,
+                ),
             ]
         )
         self.raw_root = Path(data_root) / "raw"
@@ -101,11 +125,17 @@ class IngestionService:
         self.session.commit()
         return {"book_id": book.id, "job_id": job_id}
 
-    def ingest_upload(self, *, filename: str, upload_bytes: bytes) -> dict[str, str]:
+    def ingest_upload(
+        self,
+        *,
+        source_type: str,
+        filename: str,
+        upload_bytes: bytes,
+    ) -> dict[str, str]:
         book_id = str(uuid4())
         book = self.books_repo.create(
             book_id=book_id,
-            source_type="uploaded_epub",
+            source_type=source_type,
             source_ref=filename,
             status=BookStatus.INGESTED.value,
             title=filename,
@@ -114,11 +144,11 @@ class IngestionService:
         job_id = self.jobs.create_job(
             job_type=JobType.INGEST,
             book_id=book.id,
-            payload={"source_type": "uploaded_epub", "source_ref": filename},
+            payload={"source_type": source_type, "source_ref": filename},
         )
         self.jobs.start(job_id, step="save_upload")
 
-        adapter = self.registry.select(source_type="uploaded_epub", source_ref=filename)
+        adapter = self.registry.select(source_type=source_type, source_ref=filename)
         payload = adapter.fetch(source_ref=filename, upload_bytes=upload_bytes)
         snapshot_path = adapter.snapshot(book_id=book.id, payload=payload, raw_root=self.raw_root)
 
