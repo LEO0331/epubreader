@@ -56,4 +56,26 @@ describe("api client", () => {
 
     await expect(api.health("http://127.0.0.1:8000")).rejects.toThrow("boom [request_id=req-123]");
   });
+
+  it("posts export payload with obsidian profile when provided", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch" as never).mockResolvedValue({
+      ok: true,
+      json: async () => ({ target: "obsidian" }),
+    } as Response);
+
+    await api.exportCollection(
+      "https://backend.example.com",
+      "col-1",
+      "obsidian",
+      "enhanced",
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend.example.com/api/v1/collections/col-1/export",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ target: "obsidian", obsidian_profile: "enhanced" }),
+      }),
+    );
+  });
 });

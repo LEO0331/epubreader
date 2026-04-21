@@ -208,10 +208,19 @@ export const api = {
       body: JSON.stringify({ book_id: bookId })
     });
   },
-  exportCollection(apiBaseUrl: string, collectionId: string, target: "filesystem" | "obsidian" | "github") {
+  exportCollection(
+    apiBaseUrl: string,
+    collectionId: string,
+    target: "filesystem" | "obsidian" | "github",
+    obsidianProfile?: "basic" | "enhanced",
+  ) {
+    const body: Record<string, string> = { target };
+    if (obsidianProfile) {
+      body.obsidian_profile = obsidianProfile;
+    }
     return request<Record<string, unknown>>(apiBaseUrl, `/collections/${collectionId}/export`, {
       method: "POST",
-      body: JSON.stringify({ target })
+      body: JSON.stringify(body)
     });
   }
 };

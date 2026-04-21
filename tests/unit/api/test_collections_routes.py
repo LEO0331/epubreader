@@ -86,3 +86,35 @@ def test_collection_export_rejects_absolute_output_dir():
         )
         assert export.status_code == 400
         assert "output_dir" in str(export.json()["detail"])
+
+
+def test_collection_export_accepts_enhanced_obsidian_profile():
+    app = create_app()
+
+    with TestClient(app) as client:
+        created = client.post("/api/v1/collections", json={"name": "My Set"})
+        assert created.status_code == 200
+        collection_id = created.json()["id"]
+
+        export = client.post(
+            f"/api/v1/collections/{collection_id}/export",
+            json={"target": "obsidian", "obsidian_profile": "enhanced"},
+        )
+        assert export.status_code == 200
+        assert export.json()["target"] == "obsidian"
+
+
+def test_collection_export_ignores_obsidian_profile_for_filesystem_target():
+    app = create_app()
+
+    with TestClient(app) as client:
+        created = client.post("/api/v1/collections", json={"name": "My Set"})
+        assert created.status_code == 200
+        collection_id = created.json()["id"]
+
+        export = client.post(
+            f"/api/v1/collections/{collection_id}/export",
+            json={"target": "filesystem", "obsidian_profile": "enhanced"},
+        )
+        assert export.status_code == 200
+        assert export.json()["target"] == "filesystem"

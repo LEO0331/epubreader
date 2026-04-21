@@ -27,6 +27,7 @@ class CollectionBookRequest(BaseModel):
 class ExportRequest(BaseModel):
     target: str = Field(pattern="^(filesystem|obsidian|github)$")
     output_dir: str | None = None
+    obsidian_profile: str = Field(default="basic", pattern="^(basic|enhanced)$")
 
 
 def _resolve_export_output_dir(output_dir: str | None) -> Path:
@@ -97,6 +98,7 @@ def export_collection(
 
     books_repo = BooksRepository(db)
     artifacts_repo = ArtifactsRepository(db)
+    data_dir = Path(get_settings().storage.data_dir).resolve()
 
     book_ids_raw = collection.get("book_ids")
     book_ids = [str(x) for x in book_ids_raw] if isinstance(book_ids_raw, list) else []
@@ -110,12 +112,20 @@ def export_collection(
         wiki = artifacts_repo.get_latest_by_type(book_id=book.id, artifact_type="wiki")
         qa = artifacts_repo.get_latest_by_type(book_id=book.id, artifact_type="qa")
 
+        summary_path = _safe_artifact_path(summary.path if summary else "", data_dir=data_dir)
+        wiki_path = _safe_artifact_path(wiki.path if wiki else "", data_dir=data_dir)
+        qa_path = _safe_artifact_path(qa.path if qa else "", data_dir=data_dir)
+
         books_data.append(
             {
                 "id": book.id,
-                "summary": Path(summary.path).read_text(encoding="utf-8") if summary else "",
-                "wiki": Path(wiki.path).read_text(encoding="utf-8") if wiki else "",
-                "qa": Path(qa.path).read_text(encoding="utf-8") if qa else "",
+                "title": book.title or "",
+                "source_type": book.source_type,
+                "summary": summary_path.read_text(encoding="utf-8") if summary_path else "",
+                "wiki": wiki_path.read_text(encoding="utf-8") if wiki_path else "",
+                "qa": qa_path.read_text(encoding="utf-8") if qa_path else "",
+                "summary_path": str(summary_path) if summary_path else "",
+                "wiki_path": str(wiki_path) if wiki_path else "",
             }
         )
 
@@ -133,6 +143,7 @@ def export_collection(
             output_dir=output_dir,
             collection_name=str(collection["name"]),
             books=books_data,
+            profile=payload.obsidian_profile,
         )
     else:
         target_path = export_github(
@@ -147,3 +158,20 @@ def export_collection(
         "path": str(target_path),
         "book_count": len(books_data),
     }
+
+
+def _safe_artifact_path(path: str, *, data_dir: Path) -> Path | None:
+    if not path:
+        return None
+    resolved = Path(path).resolve()
+    if not _is_within_root(resolved, data_dir):
+        return None
+    if not resolved.exists() or not resolved.is_file():
+        return None
+    return resolved
+
+
+def _is_within_root(candidate: Path, root: Path) -> bool:
+    if candidate == root:
+        return True
+    return root in candidate.parents

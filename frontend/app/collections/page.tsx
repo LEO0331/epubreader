@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 
 import { useRuntime } from "@/components/runtime-provider";
@@ -15,6 +16,7 @@ export default function CollectionsPage() {
   const [collectionId, setCollectionId] = useState("");
   const [bookId, setBookId] = useState("");
   const [target, setTarget] = useState<"filesystem" | "obsidian" | "github">("filesystem");
+  const [obsidianEnhanced, setObsidianEnhanced] = useState(false);
   const [result, setResult] = useState<Record<string, unknown> | Array<Record<string, unknown>> | null>(null);
   const [error, setError] = useState("");
 
@@ -83,11 +85,26 @@ export default function CollectionsPage() {
             <option value="obsidian">obsidian</option>
             <option value="github">github</option>
           </select>
+          {target === "obsidian" ? (
+            <label>
+              <input
+                type="checkbox"
+                checked={obsidianEnhanced}
+                onChange={(event) => setObsidianEnhanced(event.target.checked)}
+              />{" "}
+              Enhanced Obsidian format (frontmatter + tags + media handling)
+            </label>
+          ) : null}
           <button
             disabled={!collectionsEnabled || !collectionId}
             onClick={() =>
               void runIfFeatureEnabled(collectionsEnabled, setError, async () => {
-                const payload = await api.exportCollection(apiBaseUrl, collectionId, target);
+                const payload = await api.exportCollection(
+                  apiBaseUrl,
+                  collectionId,
+                  target,
+                  target === "obsidian" ? (obsidianEnhanced ? "enhanced" : "basic") : undefined,
+                );
                 setResult(payload);
               })
             }
