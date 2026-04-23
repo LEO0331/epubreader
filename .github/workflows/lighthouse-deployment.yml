@@ -38,15 +38,25 @@ jobs:
           echo "url=${cleaned}" >> "$GITHUB_OUTPUT"
 
       - name: Run Lighthouse CI on deployed frontend
+        id: lighthouse
         if: steps.target.outputs.enabled == 'true'
         uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: ./.lighthouserc.deploy.json
           uploadArtifacts: true
-          temporaryPublicStorage: false
+          temporaryPublicStorage: true
           urls: |
             ${{ steps.target.outputs.url }}
             ${{ steps.target.outputs.url }}/ingest
             ${{ steps.target.outputs.url }}/query
             ${{ steps.target.outputs.url }}/collections
             ${{ steps.target.outputs.url }}/settings
+
+      - name: Publish temporary report URLs
+        if: steps.target.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          {
+            echo "## Lighthouse Temporary Report URLs"
+            echo "${{ steps.lighthouse.outputs.links }}"
+          } >> "$GITHUB_STEP_SUMMARY"

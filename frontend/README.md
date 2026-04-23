@@ -50,3 +50,4 @@ npm test
   - Accessibility >= 90
   - Best Practices >= 90
   - SEO >= 90
+- Temporary public Lighthouse report URLs are added to the GitHub Actions job summary.

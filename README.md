@@ -185,6 +185,7 @@ uvicorn apps.api.main:create_app --factory --host 0.0.0.0 --port $PORT
   - Best Practices >= 90
   - SEO >= 90
 - It runs 3 times and uses Lighthouse CI aggregation to reduce one-off run noise.
+- It also publishes temporary public report URLs in the GitHub Actions job summary for quick review.
 - If `LIGHTHOUSE_DEPLOYMENT_URL` is not configured yet, the workflow exits cleanly without failing.
 
 ## Partial Online Usage (No API Key / No Ollama)
