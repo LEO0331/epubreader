@@ -180,10 +180,11 @@ uvicorn apps.api.main:create_app --factory --host 0.0.0.0 --port $PORT
 - Configure repository variable or secret:
   - `LIGHTHOUSE_DEPLOYMENT_URL=https://<your-vercel-domain>`
 - The workflow audits deployed pages and enforces minimum scores:
-  - Performance >= 90
+  - Performance >= 80
   - Accessibility >= 90
   - Best Practices >= 90
   - SEO >= 90
+- It runs 3 times and uses Lighthouse CI aggregation to reduce one-off run noise.
 - If `LIGHTHOUSE_DEPLOYMENT_URL` is not configured yet, the workflow exits cleanly without failing.
 
 ## Partial Online Usage (No API Key / No Ollama)

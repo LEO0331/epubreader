@@ -45,4 +45,8 @@ npm test
 - GitHub Actions workflow: `/.github/workflows/lighthouse-deployment.yml`
 - Set repository variable or secret:
   - `LIGHTHOUSE_DEPLOYMENT_URL=https://<your-vercel-domain>`
-- The workflow runs Lighthouse against deployed routes and enforces 90+ category thresholds.
+- The workflow runs Lighthouse against deployed routes and enforces:
+  - Performance >= 80
+  - Accessibility >= 90
+  - Best Practices >= 90
+  - SEO >= 90
