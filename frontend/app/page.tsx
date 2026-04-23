@@ -54,29 +54,33 @@ export default function DashboardPage() {
         <div className="card">
           <h3>1. Add a Book</h3>
           <p>Upload an EPUB file or paste a supported book URL to start.</p>
-          <Link href="/ingest"><button>Start Ingestion</button></Link>
+          <Link href="/ingest" className="button-link">Start Ingestion</Link>
         </div>
 
         <div className="card">
           <h3>2. Review Parsing Results</h3>
           <p>Check sections and chunks to confirm the content structure looks right.</p>
-          <Link href="/ingest"><button className="secondary">Find Book ID</button></Link>
+          <Link href="/ingest" className="button-link secondary">Find Book ID</Link>
         </div>
 
         <div className="card">
           <h3>3. Ask Questions with Sources</h3>
           <p>Get grounded answers and see which passages were used as evidence.</p>
-          <Link href="/query">
-            <button disabled={!isFeatureEnabled(mode, "query")}>Open Q&A</button>
-          </Link>
+          {isFeatureEnabled(mode, "query") ? (
+            <Link href="/query" className="button-link">Open Q&A</Link>
+          ) : (
+            <span className="button-link disabled" aria-disabled="true">Open Q&A</span>
+          )}
         </div>
 
         <div className="card">
           <h3>4. Organize and Export</h3>
           <p>Create collections, then export notes for Obsidian, GitHub, or local folders.</p>
-          <Link href="/collections">
-            <button disabled={!isFeatureEnabled(mode, "collections")}>Open Collections</button>
-          </Link>
+          {isFeatureEnabled(mode, "collections") ? (
+            <Link href="/collections" className="button-link">Open Collections</Link>
+          ) : (
+            <span className="button-link disabled" aria-disabled="true">Open Collections</span>
+          )}
         </div>
       </div>
     </div>

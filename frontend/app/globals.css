@@ -281,7 +281,8 @@ a {
 input,
 select,
 textarea,
-button {
+button,
+.button-link {
   width: 100%;
   padding: 10px;
   border: 1px solid #bfb49c;
@@ -293,12 +294,17 @@ button {
 input:focus,
 select:focus,
 textarea:focus,
-button:focus {
+button:focus,
+.button-link:focus {
   outline: 2px solid rgba(26, 127, 117, 0.5);
   outline-offset: 1px;
 }
 
-button {
+button,
+.button-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   margin-top: 10px;
   font-family: var(--font-display), "Trebuchet MS", sans-serif;
   font-weight: 600;
@@ -309,12 +315,14 @@ button {
   transition: transform 160ms ease, filter 160ms ease;
 }
 
-button:hover:enabled {
+button:hover:enabled,
+.button-link:hover {
   transform: translateY(-1px);
   filter: brightness(1.03);
 }
 
-button[disabled] {
+button[disabled],
+.button-link.disabled {
   opacity: 0.58;
   cursor: not-allowed;
 }
@@ -323,6 +331,10 @@ button[disabled] {
   background: linear-gradient(130deg, #f4f0e8 0%, #e8e0d1 100%);
   color: #2b3346;
   border-color: #c5b89d;
+}
+
+.button-link.disabled {
+  pointer-events: none;
 }
 
 .row {
@@ -423,5 +435,18 @@ pre {
 
   .rail-chip {
     font-size: 0.74rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-gradient,
+  .content {
+    animation: none;
+  }
+
+  .nav-link,
+  button,
+  .button-link {
+    transition: none;
   }
 }

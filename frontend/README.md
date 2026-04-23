@@ -40,3 +40,9 @@ npm test
 - Output: `.next`
 - Add env var:
   - `NEXT_PUBLIC_API_BASE_URL=https://<render-backend-domain>`
+
+## Lighthouse Deployment CI
+- GitHub Actions workflow: `/.github/workflows/lighthouse-deployment.yml`
+- Set repository variable or secret:
+  - `LIGHTHOUSE_DEPLOYMENT_URL=https://<your-vercel-domain>`
+- The workflow runs Lighthouse against deployed routes and enforces 90+ category thresholds.

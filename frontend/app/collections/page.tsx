@@ -31,7 +31,13 @@ export default function CollectionsPage() {
       <div className="grid">
         <div className="card">
           <h3>Create a Collection</h3>
-          <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Collection name" />
+          <label className="label" htmlFor="collectionName">Collection Name</label>
+          <input
+            id="collectionName"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Collection name"
+          />
           <button
             disabled={!collectionsEnabled || !name}
             onClick={() =>
@@ -63,8 +69,20 @@ export default function CollectionsPage() {
 
         <div className="card">
           <h3>Add a Book to a Collection</h3>
-          <input value={collectionId} onChange={(event) => setCollectionId(event.target.value)} placeholder="Collection ID" />
-          <input value={bookId} onChange={(event) => setBookId(event.target.value)} placeholder="Book ID" />
+          <label className="label" htmlFor="membershipCollectionId">Collection ID</label>
+          <input
+            id="membershipCollectionId"
+            value={collectionId}
+            onChange={(event) => setCollectionId(event.target.value)}
+            placeholder="Collection ID"
+          />
+          <label className="label" htmlFor="membershipBookId">Book ID</label>
+          <input
+            id="membershipBookId"
+            value={bookId}
+            onChange={(event) => setBookId(event.target.value)}
+            placeholder="Book ID"
+          />
           <button
             disabled={!collectionsEnabled || !collectionId || !bookId}
             onClick={() =>
@@ -80,14 +98,20 @@ export default function CollectionsPage() {
 
         <div className="card">
           <h3>Export Collection</h3>
-          <select value={target} onChange={(event) => setTarget(event.target.value as "filesystem" | "obsidian" | "github")}>
+          <label className="label" htmlFor="exportTarget">Export target</label>
+          <select
+            id="exportTarget"
+            value={target}
+            onChange={(event) => setTarget(event.target.value as "filesystem" | "obsidian" | "github")}
+          >
             <option value="filesystem">filesystem</option>
             <option value="obsidian">obsidian</option>
             <option value="github">github</option>
           </select>
           {target === "obsidian" ? (
-            <label>
+            <label className="label" htmlFor="obsidianEnhanced">
               <input
+                id="obsidianEnhanced"
                 type="checkbox"
                 checked={obsidianEnhanced}
                 onChange={(event) => setObsidianEnhanced(event.target.checked)}

@@ -1,0 +1,52 @@
+name: Lighthouse Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/lighthouse-deployment.yml"
+      - ".lighthouserc.deploy.json"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/lighthouse-deployment.yml"
+      - ".lighthouserc.deploy.json"
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LIGHTHOUSE_DEPLOYMENT_URL: ${{ secrets.LIGHTHOUSE_DEPLOYMENT_URL != '' && secrets.LIGHTHOUSE_DEPLOYMENT_URL || vars.LIGHTHOUSE_DEPLOYMENT_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve target URL
+        id: target
+        shell: bash
+        run: |
+          if [ -z "${LIGHTHOUSE_DEPLOYMENT_URL}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "No LIGHTHOUSE_DEPLOYMENT_URL configured. Skipping Lighthouse deployment audit."
+            exit 0
+          fi
+          cleaned="${LIGHTHOUSE_DEPLOYMENT_URL%/}"
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "url=${cleaned}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Lighthouse CI on deployed frontend
+        if: steps.target.outputs.enabled == 'true'
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./.lighthouserc.deploy.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
+          urls: |
+            ${{ steps.target.outputs.url }}
+            ${{ steps.target.outputs.url }}/ingest
+            ${{ steps.target.outputs.url }}/query
+            ${{ steps.target.outputs.url }}/collections
+            ${{ steps.target.outputs.url }}/settings

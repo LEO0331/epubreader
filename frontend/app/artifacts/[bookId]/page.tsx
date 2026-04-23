@@ -71,7 +71,8 @@ export default function ArtifactsPage() {
 
         <div className="card">
           <h3>Open One Artifact</h3>
-          <input value={artifactType} onChange={(event) => setArtifactType(event.target.value)} />
+          <label className="label" htmlFor="artifactType">Artifact type</label>
+          <input id="artifactType" value={artifactType} onChange={(event) => setArtifactType(event.target.value)} />
           <button
             disabled={!artifactsEnabled || !artifactType}
             onClick={() =>

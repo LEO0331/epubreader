@@ -100,7 +100,9 @@ export default function IngestPage() {
         <div className="card">
           <h3>Upload an EPUB File</h3>
           <p>Use this option when the file is already on your device.</p>
+          <label className="label" htmlFor="uploadFile">EPUB file</label>
           <input
+            id="uploadFile"
             type="file"
             accept=".epub"
             onChange={(event) => setUploadFile(event.target.files?.[0] ?? null)}
@@ -120,8 +122,8 @@ export default function IngestPage() {
           </ul>
           <div className="row">
             <button className="secondary" onClick={pollJob}>Check Job Status</button>
-            <Link href={`/books/${result.book_id}`}><button>Open Book Page</button></Link>
-            <Link href={`/artifacts/${result.book_id}`}><button className="secondary">Open Artifact Tools</button></Link>
+            <Link href={`/books/${result.book_id}`} className="button-link">Open Book Page</Link>
+            <Link href={`/artifacts/${result.book_id}`} className="button-link secondary">Open Artifact Tools</Link>
           </div>
         </div>
       ) : null}
