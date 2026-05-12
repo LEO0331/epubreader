@@ -118,3 +118,33 @@ def test_collection_export_ignores_obsidian_profile_for_filesystem_target():
         )
         assert export.status_code == 200
         assert export.json()["target"] == "filesystem"
+
+
+def test_collection_add_book_rejects_missing_book():
+    app = create_app()
+
+    with TestClient(app) as client:
+        created = client.post("/api/v1/collections", json={"name": "My Set"})
+        assert created.status_code == 200
+        collection_id = created.json()["id"]
+
+        added = client.post(
+            f"/api/v1/collections/{collection_id}/books",
+            json={"book_id": "missing-book"},
+        )
+
+        assert added.status_code == 404
+        assert "Book not found" in added.json()["detail"]
+
+
+def test_collection_add_book_rejects_missing_collection():
+    app = create_app()
+
+    with TestClient(app) as client:
+        added = client.post(
+            "/api/v1/collections/missing-collection/books",
+            json={"book_id": "missing-book"},
+        )
+
+        assert added.status_code == 404
+        assert "Collection not found" in added.json()["detail"]

@@ -78,4 +78,22 @@ describe("api client", () => {
       }),
     );
   });
+
+  it("encodes dynamic path segments", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch" as never).mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: "ok" }),
+    } as Response);
+
+    await api.getArtifact(
+      "https://backend.example.com",
+      "book/with space",
+      "summary/wiki",
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://backend.example.com/api/v1/books/book%2Fwith%20space/artifacts/summary%2Fwiki",
+      expect.objectContaining({ method: "GET" }),
+    );
+  });
 });

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from packages.storage.db.base import utc_now_naive
 from packages.storage.db.models import QueryLogORM
 
 
@@ -25,7 +25,7 @@ class QueriesRepository:
             question=question,
             book_scope=json.dumps(book_scope),
             response_preview=response_preview,
-            created_at=datetime.utcnow(),
+            created_at=utc_now_naive(),
         )
         self.session.add(query)
         self.session.flush()

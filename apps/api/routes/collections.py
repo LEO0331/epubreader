@@ -8,7 +8,11 @@ from sqlalchemy.orm import Session
 
 from packages.core.config.loader import get_settings
 from packages.exporters import export_filesystem, export_github, export_obsidian
-from packages.services.collection_service import CollectionService
+from packages.services.collection_service import (
+    CollectionBookNotFoundError,
+    CollectionNotFoundError,
+    CollectionService,
+)
 from packages.storage.db.session import get_db_session
 from packages.storage.repositories.artifacts_repo import ArtifactsRepository
 from packages.storage.repositories.books_repo import BooksRepository
@@ -73,7 +77,10 @@ def add_book(
     payload: CollectionBookRequest,
     db: Session = Depends(get_db_session),
 ) -> dict[str, str]:
-    return CollectionService(db).add_book(collection_id=collection_id, book_id=payload.book_id)
+    try:
+        return CollectionService(db).add_book(collection_id=collection_id, book_id=payload.book_id)
+    except (CollectionBookNotFoundError, CollectionNotFoundError) as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.delete("/{collection_id}/books/{book_id}")
@@ -82,7 +89,10 @@ def remove_book(
     book_id: str,
     db: Session = Depends(get_db_session),
 ) -> dict[str, str]:
-    return CollectionService(db).remove_book(collection_id=collection_id, book_id=book_id)
+    try:
+        return CollectionService(db).remove_book(collection_id=collection_id, book_id=book_id)
+    except CollectionNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/{collection_id}/export")

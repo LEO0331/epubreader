@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime
-
 from sqlalchemy.orm import Session
 
+from packages.storage.db.base import utc_now_naive
 from packages.storage.db.models import CollectionBookORM, CollectionORM
 
 
@@ -16,7 +15,7 @@ class CollectionsRepository:
             id=collection_id,
             name=name,
             collection_type=collection_type,
-            created_at=datetime.utcnow(),
+            created_at=utc_now_naive(),
         )
         self.session.add(collection)
         self.session.flush()

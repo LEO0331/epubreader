@@ -4,13 +4,23 @@ from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
+from packages.storage.repositories.books_repo import BooksRepository
 from packages.storage.repositories.collections_repo import CollectionsRepository
+
+
+class CollectionNotFoundError(ValueError):
+    pass
+
+
+class CollectionBookNotFoundError(ValueError):
+    pass
 
 
 class CollectionService:
     def __init__(self, session: Session):
         self.session = session
         self.collections = CollectionsRepository(session)
+        self.books = BooksRepository(session)
 
     def create_collection(self, *, name: str, collection_type: str = "user") -> dict[str, object]:
         collection_id = str(uuid4())
@@ -40,11 +50,17 @@ class CollectionService:
         ]
 
     def add_book(self, *, collection_id: str, book_id: str) -> dict[str, str]:
+        if self.collections.get(collection_id) is None:
+            raise CollectionNotFoundError(f"Collection not found: {collection_id}")
+        if self.books.get(book_id) is None:
+            raise CollectionBookNotFoundError(f"Book not found: {book_id}")
         self.collections.add_book(collection_id=collection_id, book_id=book_id)
         self.session.commit()
         return {"collection_id": collection_id, "book_id": book_id}
 
     def remove_book(self, *, collection_id: str, book_id: str) -> dict[str, str]:
+        if self.collections.get(collection_id) is None:
+            raise CollectionNotFoundError(f"Collection not found: {collection_id}")
         self.collections.remove_book(collection_id=collection_id, book_id=book_id)
         self.session.commit()
         return {"collection_id": collection_id, "book_id": book_id}

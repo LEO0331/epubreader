@@ -3,9 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from urllib.parse import urlparse
 
-import httpx
-
 from packages.ingest.adapters.base import RawSourcePayload, SourceAdapter, SourceMetadata
+from packages.ingest.adapters.http_fetch import fetch_limited_bytes
 from packages.ingest.adapters.url_security import validate_public_http_url
 
 
@@ -33,20 +32,11 @@ class EpubUrlAdapter(SourceAdapter):
             allowlist_hosts=self.allowlist_hosts,
         )
 
-        response = httpx.get(source_ref, timeout=30, follow_redirects=False)
-        if 300 <= response.status_code < 400:
-            raise ValueError("Redirect responses are not allowed for epub_url ingest")
-        response.raise_for_status()
-        content_length = response.headers.get("content-length")
-        if content_length:
-            try:
-                parsed_content_length = int(content_length)
-            except ValueError:
-                parsed_content_length = None
-            if parsed_content_length is not None and parsed_content_length > self.max_bytes:
-                raise ValueError("Remote EPUB exceeds maximum allowed size")
-        if len(response.content) > self.max_bytes:
-            raise ValueError("Remote EPUB exceeds maximum allowed size")
+        fetched = fetch_limited_bytes(
+            source_ref,
+            max_bytes=self.max_bytes,
+            resource_label="EPUB",
+        )
 
         filename = Path(urlparse(source_ref).path).name or "source.epub"
         return RawSourcePayload(
@@ -54,9 +44,9 @@ class EpubUrlAdapter(SourceAdapter):
                 source_type="epub_url",
                 source_ref=source_ref,
                 original_filename=filename,
-                content_type=response.headers.get("content-type"),
+                content_type=fetched.headers.get("content-type"),
             ),
-            content_bytes=response.content,
+            content_bytes=fetched.content,
         )
 
     def extract_metadata(self, payload: RawSourcePayload) -> dict[str, str]:

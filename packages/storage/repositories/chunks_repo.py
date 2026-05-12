@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from packages.storage.db.base import utc_now_naive
 from packages.storage.db.models import ChunkORM
 
 
@@ -29,7 +29,7 @@ class ChunksRepository:
             ordinal=ordinal,
             text=text,
             metadata_json=json.dumps(metadata),
-            created_at=datetime.utcnow(),
+            created_at=utc_now_naive(),
         )
         self.session.add(chunk)
         self.session.flush()

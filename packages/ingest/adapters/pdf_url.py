@@ -3,9 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from urllib.parse import urlparse
 
-import httpx
-
 from packages.ingest.adapters.base import RawSourcePayload, SourceAdapter, SourceMetadata
+from packages.ingest.adapters.http_fetch import fetch_limited_bytes
 from packages.ingest.adapters.url_security import validate_public_http_url
 
 PDF_MAGIC = b"%PDF-"
@@ -35,27 +34,12 @@ class PdfUrlAdapter(SourceAdapter):
             allowlist_hosts=self.allowlist_hosts,
         )
 
-        response = httpx.get(
+        fetched = fetch_limited_bytes(
             source_ref,
-            timeout=30,
-            follow_redirects=False,
-            trust_env=False,
+            max_bytes=self.max_bytes,
+            resource_label="PDF",
         )
-        if 300 <= response.status_code < 400:
-            raise ValueError("Redirect responses are not allowed for pdf_url ingest")
-        response.raise_for_status()
-
-        content_length = response.headers.get("content-length")
-        if content_length:
-            try:
-                parsed_content_length = int(content_length)
-            except ValueError:
-                parsed_content_length = None
-            if parsed_content_length is not None and parsed_content_length > self.max_bytes:
-                raise ValueError("Remote PDF exceeds maximum allowed size")
-        if len(response.content) > self.max_bytes:
-            raise ValueError("Remote PDF exceeds maximum allowed size")
-        if not response.content.startswith(PDF_MAGIC):
+        if not fetched.content.startswith(PDF_MAGIC):
             raise ValueError("Remote payload is not a valid PDF file signature")
 
         filename = Path(urlparse(source_ref).path).name or "source.pdf"
@@ -67,9 +51,9 @@ class PdfUrlAdapter(SourceAdapter):
                 source_type="pdf_url",
                 source_ref=source_ref,
                 original_filename=filename,
-                content_type=response.headers.get("content-type") or "application/pdf",
+                content_type=fetched.headers.get("content-type") or "application/pdf",
             ),
-            content_bytes=response.content,
+            content_bytes=fetched.content,
         )
 
     def extract_metadata(self, payload: RawSourcePayload) -> dict[str, str]:

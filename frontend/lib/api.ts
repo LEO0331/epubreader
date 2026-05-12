@@ -53,6 +53,10 @@ function buildApiV1Url(apiBaseUrl: string, path: string): string {
   return `${apiBaseUrl.replace(/\/$/, "")}/api/v1${path}`;
 }
 
+function pathSegment(value: string): string {
+  return encodeURIComponent(value);
+}
+
 function getApiKeyHeader(): Record<string, string> {
   const apiKey = loadApiKey();
   return apiKey ? { "X-API-Key": apiKey } : {};
@@ -138,7 +142,7 @@ export const api = {
     return (await response.json()) as IngestResponse;
   },
   getJob(apiBaseUrl: string, jobId: string) {
-    return request<JobResponse>(apiBaseUrl, `/jobs/${jobId}`, { method: "GET" });
+    return request<JobResponse>(apiBaseUrl, `/jobs/${pathSegment(jobId)}`, { method: "GET" });
   },
   listBooks(apiBaseUrl: string, limit = 50, offset = 0) {
     return request<BookSummary[]>(
@@ -148,12 +152,12 @@ export const api = {
     );
   },
   getBook(apiBaseUrl: string, bookId: string) {
-    return request<Record<string, unknown>>(apiBaseUrl, `/books/${bookId}`, { method: "GET" });
+    return request<Record<string, unknown>>(apiBaseUrl, `/books/${pathSegment(bookId)}`, { method: "GET" });
   },
   getSections(apiBaseUrl: string, bookId: string, limit = 20, offset = 0) {
     return request<SectionsResponse>(
       apiBaseUrl,
-      `/books/${bookId}/sections?limit=${limit}&offset=${offset}`,
+      `/books/${pathSegment(bookId)}/sections?limit=${limit}&offset=${offset}`,
       { method: "GET" },
     );
   },
@@ -161,23 +165,23 @@ export const api = {
     const sectionQuery = sectionId ? `&section_id=${encodeURIComponent(sectionId)}` : "";
     return request<ChunksResponse>(
       apiBaseUrl,
-      `/books/${bookId}/chunks?limit=${limit}&offset=${offset}${sectionQuery}`,
+      `/books/${pathSegment(bookId)}/chunks?limit=${limit}&offset=${offset}${sectionQuery}`,
       { method: "GET" },
     );
   },
   buildArtifacts(apiBaseUrl: string, bookId: string, includeSkill: boolean) {
-    return request<Record<string, unknown>>(apiBaseUrl, `/books/${bookId}/artifacts/build`, {
+    return request<Record<string, unknown>>(apiBaseUrl, `/books/${pathSegment(bookId)}/artifacts/build`, {
       method: "POST",
       body: JSON.stringify({ include_skill: includeSkill })
     });
   },
   listArtifacts(apiBaseUrl: string, bookId: string) {
-    return request<ArtifactRecord[]>(apiBaseUrl, `/books/${bookId}/artifacts`, { method: "GET" });
+    return request<ArtifactRecord[]>(apiBaseUrl, `/books/${pathSegment(bookId)}/artifacts`, { method: "GET" });
   },
   getArtifact(apiBaseUrl: string, bookId: string, artifactType: string) {
     return request<Record<string, unknown>>(
       apiBaseUrl,
-      `/books/${bookId}/artifacts/${encodeURIComponent(artifactType)}`,
+      `/books/${pathSegment(bookId)}/artifacts/${pathSegment(artifactType)}`,
       { method: "GET" },
     );
   },
@@ -203,7 +207,7 @@ export const api = {
     return request<Array<Record<string, unknown>>>(apiBaseUrl, "/collections", { method: "GET" });
   },
   addBookToCollection(apiBaseUrl: string, collectionId: string, bookId: string) {
-    return request<Record<string, unknown>>(apiBaseUrl, `/collections/${collectionId}/books`, {
+    return request<Record<string, unknown>>(apiBaseUrl, `/collections/${pathSegment(collectionId)}/books`, {
       method: "POST",
       body: JSON.stringify({ book_id: bookId })
     });
@@ -218,7 +222,7 @@ export const api = {
     if (obsidianProfile) {
       body.obsidian_profile = obsidianProfile;
     }
-    return request<Record<string, unknown>>(apiBaseUrl, `/collections/${collectionId}/export`, {
+    return request<Record<string, unknown>>(apiBaseUrl, `/collections/${pathSegment(collectionId)}/export`, {
       method: "POST",
       body: JSON.stringify(body)
     });

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 
 from sqlalchemy.orm import Session
 
+from packages.storage.db.base import utc_now_naive
 from packages.storage.db.models import ArtifactORM
 
 
@@ -27,7 +27,7 @@ class ArtifactsRepository:
             artifact_type=artifact_type,
             path=path,
             metadata_json=json.dumps(metadata or {}),
-            created_at=datetime.utcnow(),
+            created_at=utc_now_naive(),
         )
         self.session.add(artifact)
         self.session.flush()
