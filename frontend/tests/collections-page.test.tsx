@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import CollectionsPage from "@/app/collections/page";
 
-const exportCollectionMock = vi.fn(async () => ({ ok: true }));
+const exportCollectionMock = vi.fn(async (..._args: unknown[]) => ({ ok: true }));
 
 afterEach(() => {
   cleanup();

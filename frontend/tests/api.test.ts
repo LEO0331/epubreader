@@ -8,7 +8,7 @@ afterEach(() => {
 
 describe("api client", () => {
   it("posts ingest url payload to expected endpoint", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch" as never).mockResolvedValue({
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({ book_id: "b1", job_id: "j1" }),
     } as Response);
@@ -32,7 +32,7 @@ describe("api client", () => {
   });
 
   it("posts query answer payload to expected endpoint", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch" as never).mockResolvedValue({
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({ answer: "ok", citations: [] }),
     } as Response);
@@ -48,7 +48,7 @@ describe("api client", () => {
   });
 
   it("includes request id detail from JSON error", async () => {
-    vi.spyOn(globalThis, "fetch" as never).mockResolvedValue({
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: false,
       status: 500,
       json: async () => ({ detail: "boom", request_id: "req-123" }),
@@ -58,7 +58,7 @@ describe("api client", () => {
   });
 
   it("posts export payload with obsidian profile when provided", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch" as never).mockResolvedValue({
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({ target: "obsidian" }),
     } as Response);
@@ -80,7 +80,7 @@ describe("api client", () => {
   });
 
   it("encodes dynamic path segments", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch" as never).mockResolvedValue({
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({ id: "ok" }),
     } as Response);
